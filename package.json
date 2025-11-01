@@ -60,7 +60,7 @@
     "yarn": "^1.22.17"
   },
   "engines": {
-    "node": ">=14.17.0 <18"
+    "node": "16.x"
   },
   "tnpm": {
     "mode": "yarn",
