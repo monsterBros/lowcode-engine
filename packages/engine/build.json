@@ -14,6 +14,14 @@
         "locales": ["zh-cn"]
       }
     ],
+    [
+      "@alilc/build-plugin-alt",
+      {
+        "type": "plugin",
+        "inject": true, 
+        "openUrl": "https://lowcode-engine.cn/demo/index.html?debug"
+      }
+    ],
     "./build.plugin.js"
   ]
 }

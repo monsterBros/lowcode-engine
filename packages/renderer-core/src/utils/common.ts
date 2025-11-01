@@ -237,6 +237,7 @@ function parseExpression(a: any, b?: any, c = false) {
       return (window.parent as any).__newFunc(tarStr)(self);
     }
     const code = `with(${thisRequired ? '{}' : '$scope || {}'}) { ${tarStr} }`;
+    // cd：拿到表达式，创建可执行函数。
     return new Function('$scope', code)(self);
   } catch (err) {
     logger.error(`${logScope || ''} parseExpression.error`, err, str, self?.__self ?? self);

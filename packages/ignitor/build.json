@@ -1,15 +1,8 @@
 {
-  "entry": {
-    "AliLowCodeEngine": "../engine/src/index.ts",
-    "ReactSimulatorRenderer": "../react-simulator-renderer/src/index.ts"
-  },
-  "vendor": false,
   "devServer": {
     "liveReload": false,
     "hot": false
   },
-  "library": "[name]",
-  "publicPath": "/",
   "externals": {
     "react": "var window.React",
     "react-dom": "var window.ReactDOM",
@@ -22,22 +15,13 @@
     "lodash": "var _"
   },
   "plugins": [
+    "@alilc/build-plugin-lce",
     [
-      "build-plugin-react-app"
-    ],
-    [
-      "build-plugin-fusion",
+      "@alilc/build-plugin-alt",
       {
-        "themePackage": "@alifd/theme-lowcode-light",
-        "externalNext": "umd"
-      }
-    ],
-    [
-      "build-plugin-moment-locales",
-      {
-        "locales": [
-          "zh-cn"
-        ]
+        "type": "plugin",
+        "inject": true, 
+        "openUrl": "https://lowcode-engine.cn/demo/index.html?debug"
       }
     ],
     "./build.plugin.js"
