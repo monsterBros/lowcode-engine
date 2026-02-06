@@ -1,4 +1,5 @@
 import React from 'react';
+import { useDrop } from 'react-dnd';
 
 interface ContainerProps {
     children?: React.ReactNode;
@@ -6,6 +7,9 @@ interface ContainerProps {
     background?: string;
     padding?: number;
     gap?: number;
+    // 新增：用于拖放支持
+    nodeId?: string;
+    onDropChild?: (nodeId: string, material: any) => void;
 }
 
 const Container: React.FC<ContainerProps> = ({
@@ -13,22 +17,49 @@ const Container: React.FC<ContainerProps> = ({
     layout = 'vertical',
     background = '#f5f5f5',
     padding = 16,
-    gap = 8
+    gap = 8,
+    nodeId,
+    onDropChild
 }) => {
+    // 拖放支持
+    const [{ isOver, canDrop }, drop] = useDrop({
+        accept: 'MATERIAL',
+        drop: (item: any, monitor) => {
+            // 只处理直接拖放到此容器的情况
+            const didDrop = monitor.didDrop();
+            if (didDrop) {
+                return;
+            }
+
+            if (onDropChild && nodeId) {
+                onDropChild(nodeId, item.material);
+            }
+        },
+        collect: (monitor) => ({
+            isOver: monitor.isOver({ shallow: true }),
+            canDrop: monitor.canDrop(),
+        }),
+    });
+
     const styles: React.CSSProperties = {
         display: 'flex',
         flexDirection: layout === 'vertical' ? 'column' : 'row',
-        background,
+        background: isOver && canDrop ? '#e6f7ff' : background,
         padding: `${padding}px`,
         gap: `${gap}px`,
         minHeight: '100px',
         borderRadius: '4px',
-        border: '1px dashed #d9d9d9',
+        border: isOver && canDrop ? '2px dashed #1890ff' : '1px dashed #d9d9d9',
+        position: 'relative',
+        transition: 'all 0.2s',
     };
 
     return (
-        <div style={styles}>
-            {children || <div style={{ color: '#999', textAlign: 'center' }}>拖拽组件到这里</div>}
+        <div ref={drop} style={styles}>
+            {children && React.Children.count(children) > 0
+                ? children
+                : <div style={{ color: '#999', textAlign: 'center', width: '100%' }}>拖拽组件到这里</div>
+            }
         </div>
     );
 };

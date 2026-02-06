@@ -5,7 +5,16 @@ export interface ComponentSchema {
     id: string;
     componentName: string;
     props?: Record<string, any>;
+    events?: Record<string, EventHandler>;
     children?: ComponentSchema[];
+}
+
+/**
+ * 事件处理器定义
+ */
+export interface EventHandler {
+    type: 'JSFunction' | 'JSExpression';
+    value: string;
 }
 
 /**

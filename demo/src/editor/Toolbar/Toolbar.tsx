@@ -1,11 +1,37 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Space, message } from 'antd';
-import { SaveOutlined, EyeOutlined, ExportOutlined } from '@ant-design/icons';
+import { SaveOutlined, EyeOutlined, ExportOutlined, UndoOutlined, RedoOutlined } from '@ant-design/icons';
 import { useEditor } from '@/store/EditorContext';
 import styles from './Toolbar.module.css';
 
 const Toolbar: React.FC = () => {
-    const { schema } = useEditor();
+    const { schema, undo, redo, canUndo, canRedo } = useEditor();
+
+    // 快捷键支持
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Ctrl+Z 撤销
+            if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                if (canUndo) {
+                    undo();
+                    message.info('撤销');
+                }
+            }
+
+            // Ctrl+Y 或 Ctrl+Shift+Z 重做
+            if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
+                e.preventDefault();
+                if (canRedo) {
+                    redo();
+                    message.info('重做');
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [undo, redo, canUndo, canRedo]);
 
     const handleSave = () => {
         message.success('保存成功！');
@@ -36,6 +62,22 @@ const Toolbar: React.FC = () => {
             </div>
             <div className={styles.right}>
                 <Space>
+                    <Button
+                        icon={<UndoOutlined />}
+                        onClick={undo}
+                        disabled={!canUndo}
+                        title="撤销 (Ctrl+Z)"
+                    >
+                        撤销
+                    </Button>
+                    <Button
+                        icon={<RedoOutlined />}
+                        onClick={redo}
+                        disabled={!canRedo}
+                        title="重做 (Ctrl+Y)"
+                    >
+                        重做
+                    </Button>
                     <Button icon={<SaveOutlined />} onClick={handleSave}>
                         保存
                     </Button>
