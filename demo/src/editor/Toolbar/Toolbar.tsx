@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Button, Space, message } from 'antd';
 import { SaveOutlined, EyeOutlined, ExportOutlined, UndoOutlined, RedoOutlined } from '@ant-design/icons';
 import { useEditor } from '@/store/EditorContext';
+import CodeExport from './CodeExport';
 import styles from './Toolbar.module.css';
 
 const Toolbar: React.FC = () => {
@@ -59,6 +60,7 @@ const Toolbar: React.FC = () => {
         <div className={styles.toolbar}>
             <div className={styles.left}>
                 <h1 className={styles.title}>低代码引擎 Demo</h1>
+                <span className={styles.badge}>v2.0 Complete</span>
             </div>
             <div className={styles.right}>
                 <Space>
@@ -84,6 +86,7 @@ const Toolbar: React.FC = () => {
                     <Button icon={<EyeOutlined />} onClick={handlePreview}>
                         预览
                     </Button>
+                    <CodeExport />
                     <Button type="primary" icon={<ExportOutlined />} onClick={handleExport}>
                         导出JSON
                     </Button>

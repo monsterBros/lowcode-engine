@@ -1,0 +1,38 @@
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+
+.header {
+    padding: 16px;
+    border-bottom: 1px solid #e8e8e8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: #999;
+}
+
+.panelHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}

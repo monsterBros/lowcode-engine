@@ -20,6 +20,16 @@
     color: #333;
 }
 
+.badge {
+    margin-left: 12px;
+    padding: 2px 8px;
+    background: #52c41a;
+    color: #fff;
+    font-size: 10px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
 .right {
     /* 右侧按钮区域 */
 }

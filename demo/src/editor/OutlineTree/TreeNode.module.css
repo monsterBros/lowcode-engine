@@ -1,61 +1,91 @@
-.treeNode {
-    user-select: none;
-}
-
-.nodeContent {
-    display: flex;
-    align-items: center;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: background 0.2s;
+.nodeWrapper {
     position: relative;
 }
 
-.nodeContent:hover {
+.nodeWrapper.dragging {
+    opacity: 0.5;
+}
+
+.nodeWrapper.dropTarget {
+    background: #e6f7ff;
+    border-radius: 2px;
+}
+
+.node {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+}
+
+.node:hover {
     background: #f5f5f5;
 }
 
-.nodeContent:hover .deleteBtn {
-    display: block;
+.node:hover .actions {
+    opacity: 1;
 }
 
-.selected {
+.node.selected {
     background: #e6f7ff;
+    color: #1890ff;
 }
 
-.toggle {
+.node.locked {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+
+.expandIcon {
     width: 16px;
+    text-align: center;
     font-size: 10px;
     cursor: pointer;
+    user-select: none;
+}
+
+.placeholder {
+    width: 16px;
     display: inline-block;
-    color: #666;
 }
 
-.icon {
-    margin-right: 6px;
-    font-size: 16px;
+.label {
+    font-size: 13px;
+    user-select: none;
 }
 
-.name {
-    flex: 1;
-    font-size: 14px;
-    color: #333;
+.actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
 }
 
-.deleteBtn {
-    display: none;
-    background: transparent;
-    border: none;
-    color: #999;
+.node.selected .actions {
+    opacity: 1;
+}
+
+.action {
     cursor: pointer;
     font-size: 14px;
-    padding: 0 4px;
+    color: #999;
+    transition: color 0.2s;
 }
 
-.deleteBtn:hover {
-    color: #ff4d4f;
+.action:hover {
+    color: #1890ff;
 }
 
 .children {
-    /* 子节点容器 */
+    margin-left: 0;
 }
