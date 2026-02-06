@@ -8,22 +8,33 @@ import styles from './PropertyPanel.module.css';
 
 // Setter映射
 const SetterComponents: Record<string, React.ComponentType<any>> = {
+    // 基础Setter (12种)
     StringSetter: Setters.StringSetter,
     NumberSetter: Setters.NumberSetter,
     BooleanSetter: Setters.BooleanSetter,
     SelectSetter: Setters.SelectSetter,
     ColorSetter: Setters.ColorSetter,
     DateSetter: Setters.DateSetter,
+    TimeSetter: Setters.TimeSetter,
     TextAreaSetter: Setters.TextAreaSetter,
     SliderSetter: Setters.SliderSetter,
     RateSetter: Setters.RateSetter,
     SwitchSetter: Setters.SwitchSetter,
-    ArraySetter: Setters.ArraySetter,
-    JSONS
+    ClassNameSetter: Setters.ClassNameSetter,
 
-etter: Setters.JSONSetter,
+    // 复杂Setter (4种)
+    ArraySetter: Setters.ArraySetter,
+    JSONSetter: Setters.JSONSetter,
+    FunctionSetter: Setters.FunctionSetter,
+    ExpressionSetter: Setters.ExpressionSetter,
+
+    // 资源Setter (2种)
     ImageSetter: Setters.ImageSetter,
+    IconSetter: Setters.IconSetter,
+
+    // 高级Setter (2种)
     StyleSetter: Setters.StyleSetter,
+    MixedSetter: Setters.MixedSetter,
 };
 
 const PropertyPanel: React.FC = () => {
