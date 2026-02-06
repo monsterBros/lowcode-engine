@@ -1,0 +1,61 @@
+.treeNode {
+    user-select: none;
+}
+
+.nodeContent {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+}
+
+.nodeContent:hover {
+    background: #f5f5f5;
+}
+
+.nodeContent:hover .deleteBtn {
+    display: block;
+}
+
+.selected {
+    background: #e6f7ff;
+}
+
+.toggle {
+    width: 16px;
+    font-size: 10px;
+    cursor: pointer;
+    display: inline-block;
+    color: #666;
+}
+
+.icon {
+    margin-right: 6px;
+    font-size: 16px;
+}
+
+.name {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+}
+
+.deleteBtn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+}
+
+.deleteBtn:hover {
+    color: #ff4d4f;
+}
+
+.children {
+    /* 子节点容器 */
+}

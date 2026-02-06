@@ -1,0 +1,35 @@
+.container {
+    height: 100%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    padding: 16px;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.componentName {
+    font-size: 14px;
+    color: #666;
+}
+
+.content {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: #999;
+}

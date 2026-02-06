@@ -1,0 +1,31 @@
+{
+    "name": "lowcode-engine-demo",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "description": "完备的低代码引擎Demo框架",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    },
+    "dependencies": {
+        "@ant-design/icons": "^6.1.0",
+        "antd": "^4.24.15",
+        "classnames": "^2.3.2",
+        "react": "^16.14.0",
+        "react-dnd": "^16.0.1",
+        "react-dnd-html5-backend": "^16.0.1",
+        "react-dom": "^16.14.0",
+        "uuid": "^9.0.0"
+    },
+    "devDependencies": {
+        "@types/react": "^16.14.52",
+        "@types/react-dom": "^16.9.24",
+        "@types/uuid": "^9.0.7",
+        "@vitejs/plugin-react": "^4.2.1",
+        "typescript": "^5.2.2",
+        "vite": "^5.0.8"
+    }
+}
