@@ -1,17 +1,19 @@
-import React from 'react';
-import { Form, Input, Tabs, Collapse } from 'antd';
+import React, { useState } from 'react';
+import { message } from 'antd';
 import { useEditor } from '@/store/EditorContext';
 import { findNode } from '@/utils/schema';
+import { materialRegistry } from '@/materials/registry';
+import { eventValidator, VALIDATED_EVENTS } from '@/engine/EventValidator';
+import { Form, Input, Select, Button, Space, Alert } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './EventPanel.module.css';
 
-const { Panel } = Collapse;
 const { TextArea } = Input;
 
-/**
- * 事件配置面板 - 为组件配置事件处理器
- */
 const EventPanel: React.FC = () => {
     const { schema, selectedNodeId, updateNodeProps } = useEditor();
+    const [customEventName, setCustomEventName] = useState('');
+    const [validationError, setValidationError] = useState('');
 
     if (!selectedNodeId) {
         return (
@@ -30,62 +32,158 @@ const EventPanel: React.FC = () => {
         );
     }
 
+    const material = materialRegistry.getMaterial(selectedNode.componentName);
+    const events = selectedNode.events || {};
+    const eventNames = Object.keys(events);
+
     const handleEventChange = (eventName: string, code: string) => {
-        const events = selectedNode.events || {};
-        updateNodeProps(selectedNodeId, {
-            events: {
-                ...events,
-                [eventName]: {
-                    type: 'JSFunction',
-                    value: code
-                }
-            }
-        });
+        // 验证事件处理器代码
+        const validation = eventValidator.validateHandler(code);
+        if (!validation.valid) {
+            setValidationError(validation.error || '');
+            message.error(validation.error);
+            return;
+        }
+
+        setValidationError('');
+
+        const updatedEvents = {
+            ...events,
+            [eventName]: {
+                type: 'JSFunction',
+                value: code,
+            },
+        };
+
+        updateNodeProps(selectedNodeId, { events: updatedEvents });
+        message.success(`事件 ${eventName} 已更新`);
     };
 
-    // 常用事件列表
-    const commonEvents = [
-        { name: 'onClick', label: '点击事件', placeholder: 'function() { console.log("clicked"); }' },
-        { name: 'onChange', label: '变更事件', placeholder: 'function(e) { console.log(e.target.value); }' },
-        { name: 'onFocus', label: '聚焦事件', placeholder: 'function() { console.log("focused"); }' },
-        { name: 'onBlur', label: '失焦事件', placeholder: 'function() { console.log("blurred"); }' },
-    ];
+    const handleAddCustomEvent = () => {
+        if (!customEventName.trim()) {
+            message.warning('请输入事件名称');
+            return;
+        }
+
+        // 验证事件名称
+        const validation = eventValidator.validateEventName(customEventName);
+        if (!validation.valid) {
+            message.error(validation.error);
+            return;
+        }
+
+        if (events[customEventName]) {
+            message.warning('该事件已存在');
+            return;
+        }
+
+        const updatedEvents = {
+            ...events,
+            [customEventName]: {
+                type: 'JSFunction',
+                value: 'function(event) {\n  console.log(event);\n}',
+            },
+        };
+
+        updateNodeProps(selectedNodeId, { events: updatedEvents });
+        setCustomEventName('');
+        message.success(`事件 ${customEventName} 已添加`);
+    };
+
+    const handleDeleteEvent = (eventName: string) => {
+        const updatedEvents = { ...events };
+        delete updatedEvents[eventName];
+        updateNodeProps(selectedNodeId, { events: updatedEvents });
+        message.success(`事件 ${eventName} 已删除`);
+    };
+
+    // 标准事件列表
+    const standardEvents = Object.values(VALIDATED_EVENTS);
+    const unusedStandardEvents = standardEvents.filter(e => !events[e]);
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
                 <div className={styles.title}>事件配置</div>
+                <div className={styles.subtitle}>{material?.title || selectedNode.componentName}</div>
             </div>
-            <div className={styles.content}>
-                <Collapse defaultActiveKey={['common']} ghost>
-                    <Panel header="常用事件" key="common">
-                        <Form layout="vertical" size="small">
-                            {commonEvents.map(event => (
-                                <Form.Item
-                                    key={event.name}
-                                    label={event.label}
-                                >
-                                    <TextArea
-                                        rows={4}
-                                        placeholder={event.placeholder}
-                                        value={selectedNode.events?.[event.name]?.value || ''}
-                                        onChange={e => handleEventChange(event.name, e.target.value)}
-                                    />
-                                </Form.Item>
-                            ))}
-                        </Form>
-                    </Panel>
-                </Collapse>
 
-                <div className={styles.help}>
-                    <h4>💡 使用提示</h4>
-                    <ul>
-                        <li>事件处理函数使用 JavaScript 编写</li>
-                        <li>函数会在运行时动态执行</li>
-                        <li>可以使用闭包访问外部变量</li>
-                        <li>示例: <code>function() {'{'} alert('Hello!'); {'}'}</code></li>
-                    </ul>
-                </div>
+            {validationError && (
+                <Alert
+                    message="验证错误"
+                    description={validationError}
+                    type="error"
+                    closable
+                    onClose={() => setValidationError('')}
+                    style={{ margin: '12px 16px' }}
+                />
+            )}
+
+            <div className={styles.content}>
+                {/* 快速添加标准事件 */}
+                {unusedStandardEvents.length > 0 && (
+                    <Form.Item label="快速添加">
+                        <Select
+                            placeholder="选择标准事件"
+                            options={unusedStandardEvents.map(e => ({ label: e, value: e }))}
+                            onChange={(value) => {
+                                const updatedEvents = {
+                                    ...events,
+                                    [value]: {
+                                        type: 'JSFunction',
+                                        value: 'function(event) {\n  console.log(event);\n}',
+                                    },
+                                };
+                                updateNodeProps(selectedNodeId, { events: updatedEvents });
+                            }}
+                        />
+                    </Form.Item>
+                )}
+
+                {/* 自定义事件 */}
+                <Form.Item label="自定义事件">
+                    <Space.Compact style={{ width: '100%' }}>
+                        <Input
+                            placeholder="事件名称(如：onClick)"
+                            value={customEventName}
+                            onChange={(e) => setCustomEventName(e.target.value)}
+                            onPressEnter={handleAddCustomEvent}
+                        />
+                        <Button icon={<PlusOutlined />} onClick={handleAddCustomEvent}>
+                            添加
+                        </Button>
+                    </Space.Compact>
+                    <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
+                        💡 事件名称必须以"on"开头，使用驼峰命名
+                    </div>
+                </Form.Item>
+
+                {/* 已配置的事件列表 */}
+                {eventNames.length === 0 ? (
+                    <div className={styles.empty}>暂无事件配置</div>
+                ) : (
+                    eventNames.map((eventName) => (
+                        <Form.Item key={eventName} label={eventName}>
+                            <Space direction="vertical" style={{ width: '100%' }}>
+                                <TextArea
+                                    rows={6}
+                                    value={events[eventName].value}
+                                    onChange={(e) => handleEventChange(eventName, e.target.value)}
+                                    placeholder="function(event) { ... }"
+                                    style={{ fontFamily: 'monospace', fontSize: '12px' }}
+                                />
+                                <Button
+                                    danger
+                                    size="small"
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => handleDeleteEvent(eventName)}
+                                >
+                                    删除
+                                </Button>
+                            </Space>
+                        </Form.Item>
+                    ))
+                )}
             </div>
         </div>
     );
