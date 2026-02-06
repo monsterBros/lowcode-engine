@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { useEditor } from '@/store/EditorContext';
 import { ComponentSchema } from '@/types';
 import { generateId } from '@/utils/uuid';
+import { Switch, Space } from 'antd';
 import Renderer from './Renderer';
+import Simulator from './Simulator';
 import styles from './Canvas.module.css';
 
 const Canvas: React.FC = () => {
-    const { schema, addNode } = useEditor();
+    const { schema, addNode, setSelectedNodeId, deleteNode, selectedNodeId } = useEditor();
+    const [useSimulator, setUseSimulator] = useState(false);
 
     const [{ isOver }, drop] = useDrop({
         accept: 'MATERIAL',
@@ -38,8 +41,30 @@ const Canvas: React.FC = () => {
     });
 
     return (
-        <div ref={drop} className={`${styles.canvas} ${isOver ? styles.isOver : ''}`}>
-            <Renderer schema={schema} />
+        <div className={styles.canvasWrapper}>
+            <div className={styles.canvasToolbar}>
+                <Space>
+                    <span>渲染模式:</span>
+                    <Switch
+                        checkedChildren="iframe隔离"
+                        unCheckedChildren="普通渲染"
+                        checked={useSimulator}
+                        onChange={setUseSimulator}
+                    />
+                </Space>
+            </div>
+            <div ref={drop} className={`${styles.canvas} ${isOver ? styles.isOver : ''}`}>
+                {useSimulator ? (
+                    <Simulator
+                        schema={schema}
+                        selectedNodeId={selectedNodeId}
+                        onNodeSelect={setSelectedNodeId}
+                        onNodeDelete={deleteNode}
+                    />
+                ) : (
+                    <Renderer schema={schema} />
+                )}
+            </div>
         </div>
     );
 };

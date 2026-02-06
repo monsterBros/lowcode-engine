@@ -1,9 +1,30 @@
-.canvas {
+.canvasWrapper {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
     background: #f0f0f0;
+}
+
+.canvasToolbar {
+    padding: 12px 20px;
+    background: #fff;
+    border-bottom: 1px solid #e8e8e8;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.canvasToolbar span {
+    font-size: 14px;
+    color: #666;
+}
+
+.canvas {
+    flex: 1;
     position: relative;
     transition: background 0.2s;
+    overflow: hidden;
 }
 
 .isOver {

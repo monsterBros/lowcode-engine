@@ -1,6 +1,7 @@
 import React from 'react';
 import { Collapse } from 'antd';
 import MaterialCard from './MaterialCard';
+import MaterialMarket from './MaterialMarket';
 import { materialRegistry } from '@/materials/registry';
 import styles from './MaterialList.module.css';
 
@@ -17,6 +18,7 @@ const MaterialList: React.FC = () => {
     return (
         <div className={styles.container}>
             <div className={styles.header}>组件库</div>
+            <MaterialMarket />
             <Collapse defaultActiveKey={categories} ghost>
                 {categories.map((category) => {
                     const categoryMaterials = materials.filter(
