@@ -97,6 +97,14 @@ export const EditorProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         }
     };
 
+    const moveNode = (nodeId: string, targetParentId: string, targetIndex: number) => {
+        // 导入移动节点的工具函数
+        const { moveNodeInSchema } = require('@/utils/schemaHelpers');
+        const newSchema = moveNodeInSchema(schema, nodeId, targetParentId, targetIndex);
+        updateSchema(newSchema);
+        eventBus.emit(EVENTS.NODE_MOVE, { nodeId, targetParentId, targetIndex });
+    };
+
     // 监听节点选中事件
     useEffect(() => {
         const handleSelect = (nodeId: string | null) => {
@@ -119,6 +127,7 @@ export const EditorProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                 addNode,
                 deleteNode,
                 updateNodeProps,
+                moveNode,
                 undo,
                 redo,
                 canUndo,

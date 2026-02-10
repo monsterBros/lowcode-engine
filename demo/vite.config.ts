@@ -15,6 +15,9 @@ export default defineConfig({
       localsConvention: 'camelCase',
     },
   },
+  define: {
+    'process.env': '{}',
+  },
   server: {
     port: 3000,
     open: true,

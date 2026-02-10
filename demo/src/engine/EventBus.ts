@@ -79,10 +79,11 @@ export const EVENTS = {
     NODE_ADD: 'node:add',
     NODE_DELETE: 'node:delete',
     NODE_UPDATE: 'node:update',
+    NODE_MOVE: 'node:move',
 
     // Schema相关
     SCHEMA_CHANGE: 'schema:change',
 
     // 历史相关
     HISTORY_CHANGE: 'history:change',
-};
+} as const;

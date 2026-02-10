@@ -33,7 +33,7 @@ const ArraySetter: React.FC<ArraySetterProps> = ({ value = [], onChange }) => {
                 <Space key={index} style={{ width: '100%' }}>
                     <Input
                         value={item}
-                        onChange={(e) => handleChange(index, e.target value)}
+                        onChange={(e) => handleChange(index, e.target.value)}
                         style={{ flex: 1 }}
                     />
                     <Button

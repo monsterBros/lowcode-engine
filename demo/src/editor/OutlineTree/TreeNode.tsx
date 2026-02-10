@@ -9,10 +9,12 @@ import styles from './TreeNode.module.css';
 interface TreeNodeProps {
     node: ComponentSchema;
     level: number;
+    parentId?: string;
+    index: number;
 }
 
-const TreeNode: React.FC<TreeNodeProps> = ({ node, level }) => {
-    const { selectedNodeId, setSelectedNodeId, deleteNode } = useEditor();
+const TreeNode: React.FC<TreeNodeProps> = ({ node, level, parentId, index }) => {
+    const { selectedNodeId, setSelectedNodeId, deleteNode, moveNode } = useEditor();
     const [expanded, setExpanded] = useState(true);
     const [locked, setLocked] = useState(false);
     const [hidden, setHidden] = useState(false);
@@ -24,27 +26,54 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level }) => {
     // 拖拽功能
     const [{ isDragging }, drag] = useDrag({
         type: 'TREE_NODE',
-        item: { nodeId: node.id, componentName: node.componentName },
-        canDrag: !locked,
+        item: {
+            nodeId: node.id,
+            componentName: node.componentName,
+            parentId: parentId,
+            index: index
+        },
+        canDrag: !locked && node.id !== 'root',
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
         }),
     });
 
-    const [{ isOver }, drop] = useDrop({
+    const [{ isOver, canDrop }, drop] = useDrop({
         accept: 'TREE_NODE',
         canDrop: (item: any) => {
             // 不能拖到自己上
-            return item.nodeId !== node.id && isContainer;
+            if (item.nodeId === node.id) return false;
+            // 只能拖到容器上
+            if (!isContainer) return false;
+            // 不能拖到自己的子节点上
+            if (isDescendant(node, item.nodeId)) return false;
+            return true;
         },
-        drop: (item: any) => {
-            console.log(`拖拽 ${item.nodeId} 到 ${node.id}`);
-            // TODO: 实现节点移动逻辑
+        drop: (item: any, monitor) => {
+            if (monitor.didDrop()) return;
+
+            // 执行节点移动
+            if (moveNode) {
+                moveNode(item.nodeId, node.id, 0); // 移动到目标容器的第一个位置
+            }
         },
         collect: (monitor) => ({
-            isOver: monitor.isOver() && monitor.canDrop(),
+            isOver: monitor.isOver({ shallow: true }),
+            canDrop: monitor.canDrop(),
         }),
     });
+
+    // 检查是否是子孙节点
+    const isDescendant = (parent: ComponentSchema, nodeId: string): boolean => {
+        if (!parent.children) return false;
+
+        for (const child of parent.children) {
+            if (child.id === nodeId) return true;
+            if (isDescendant(child, nodeId)) return true;
+        }
+
+        return false;
+    };
 
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -72,8 +101,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level }) => {
 
     const handleCopy = (e: React.MouseEvent) => {
         e.stopPropagation();
-        // TODO: 实现复制功能
-        console.log('复制节点:', node.id);
+        // 复制节点到剪贴板
+        const nodeCopy = JSON.parse(JSON.stringify(node));
+        localStorage.setItem('copied-node', JSON.stringify(nodeCopy));
+        console.log('节点已复制:', node.id);
     };
 
     return (
@@ -82,7 +113,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level }) => {
                 drag(el);
                 drop(el);
             }}
-            className={`${styles.nodeWrapper} ${isDragging ? styles.dragging : ''} ${isOver ? styles.dropTarget : ''}`}
+            className={`${styles.nodeWrapper} ${isDragging ? styles.dragging : ''} ${isOver && canDrop ? styles.dropTarget : ''}`}
             style={{ opacity: hidden ? 0.5 : 1 }}
         >
             <div
@@ -126,8 +157,14 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level }) => {
 
             {hasChildren && expanded && (
                 <div className={styles.children}>
-                    {node.children!.map((child) => (
-                        <TreeNode key={child.id} node={child} level={level + 1} />
+                    {node.children!.map((child, idx) => (
+                        <TreeNode
+                            key={child.id}
+                            node={child}
+                            level={level + 1}
+                            parentId={node.id}
+                            index={idx}
+                        />
                     ))}
                 </div>
             )}
