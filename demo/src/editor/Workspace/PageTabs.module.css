@@ -1,0 +1,48 @@
+.pageTabs {
+    width: 100%;
+    background: #fff;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.pageTabs :global(.ant-tabs-nav) {
+    margin: 0;
+    padding: 0 16px;
+}
+
+.pageTabs :global(.ant-tabs-tab) {
+    padding: 8px 12px;
+}
+
+.tabLabel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tabIcon {
+    font-size: 14px;
+}
+
+.moreBtn {
+    margin-left: 4px;
+    padding: 2px 4px;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.moreBtn:hover {
+    color: #1890ff;
+}
+
+.addBtn {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #666;
+    font-size: 14px;
+    transition: color 0.3s;
+}
+
+.addBtn:hover {
+    color: #1890ff;
+}

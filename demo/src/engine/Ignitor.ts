@@ -10,6 +10,7 @@ import { commandManager, Command } from './CommandManager';
 import { variableManager } from './VariableManager';
 import { i18nManager } from './I18nManager';
 import { widgetManager, Widget } from './WidgetManager';
+import { workspaceManager } from './WorkspaceManager';
 import { engine, setEditorContext } from '@/shell/api';
 
 export interface EngineConfig {
@@ -43,6 +44,14 @@ export interface EngineConfig {
 
     // Widget配置
     widgets?: Widget[];      // 自定义Widget列表
+
+    // Workspace配置
+    workspace?: {
+        defaultPages?: Array<{
+            title: string;
+            schema: any;
+        }>;
+    };
 
     // 其他配置
     theme?: 'light' | 'dark';
@@ -91,13 +100,16 @@ export class Ignitor {
             // 6. 注册Widget
             await this.registerWidgets();
 
-            // 7. 加载插件
+            // 7. 初始化Workspace
+            await this.initWorkspace();
+
+            // 8. 加载插件
             await this.loadPlugins();
 
-            // 8. 设置主题
+            // 9. 设置主题
             this.applyTheme();
 
-            // 9. 触发ready事件
+            // 10. 触发ready事件
             eventBus.emit('engine:ready');
 
             this.initialized = true;
@@ -294,6 +306,39 @@ export class Ignitor {
     }
 
     /**
+     * 初始化Workspace
+     */
+    private async initWorkspace() {
+        console.log('📄 Initializing Workspace...');
+
+        const workspaceConfig = this.config.workspace;
+
+        if (workspaceConfig?.defaultPages && workspaceConfig.defaultPages.length > 0) {
+            // 创建默认页面
+            workspaceConfig.defaultPages.forEach(pageConfig => {
+                workspaceManager.createPage({
+                    title: pageConfig.title,
+                    schema: pageConfig.schema
+                });
+            });
+            console.log(`  Created ${workspaceConfig.defaultPages.length} default pages`);
+        } else {
+            // 创建一个默认页面
+            workspaceManager.createPage({
+                title: '页面1',
+                schema: {
+                    componentName: 'Page',
+                    id: 'root_default',
+                    props: {},
+                    children: []
+                },
+                closeable: false
+            });
+            console.log('  Created 1 default page');
+        }
+    }
+
+    /**
      * 加载插件
      */
     private async loadPlugins() {
@@ -332,6 +377,7 @@ export class Ignitor {
         console.log(`  Plugins: ${pluginManager.getAll().length}`);
         console.log(`  Commands: ${commandManager.getAll().length}`);
         console.log(`  Variables: ${variableManager.getAll().length}`);
+        console.log(`  Pages: ${workspaceManager.getPageCount()}`);
         console.log(`  Locale: ${i18nManager.getCurrentLocale()}`);
         console.log('');
     }
