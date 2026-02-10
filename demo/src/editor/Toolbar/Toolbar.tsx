@@ -110,7 +110,13 @@ const Toolbar: React.FC = () => {
                     message.success(`组件 ${componentName} 已可用！`);
                 }}
             />
-        </div>
+
+            <LivePreview
+                open={showPreview}
+                onClose={() => setShowPreview(false)}
+                schema={schema}
+            />
+        </>
     );
 };
 
