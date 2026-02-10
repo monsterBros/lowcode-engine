@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal } from 'antd';
 import { ComponentSchema } from '@/types';
-import { Renderer } from './Renderer';
+import Renderer from './Renderer';
 import styles from './LivePreview.module.css';
 
 interface LivePreviewProps {
