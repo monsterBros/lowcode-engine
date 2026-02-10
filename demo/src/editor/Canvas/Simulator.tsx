@@ -1,6 +1,19 @@
 /**
  * Simulator - iframe隔离渲染器
- * 参考 lowcode-engine 的 Simulator 设计
+ * 
+ * 核心功能：
+ * 1. 在独立的iframe中渲染用户设计的页面
+ * 2. 完全隔离样式和脚本，防止污染主窗口
+ * 3. 模拟真实的浏览器环境
+ * 
+ * 与普通渲染的区别：
+ * - 普通渲染：直接在主窗口渲染，共享样式和脚本上下文
+ * - iframe渲染：在隔离的iframe中渲染，独立的样式和脚本上下文
+ * 
+ * 技术要点：
+ * - 使用postMessage进行跨iframe通信
+ * - 动态注入React和组件库到iframe
+ * - 处理样式隔离和组件渲染
  */
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -18,7 +31,14 @@ interface SimulatorProps {
 }
 
 /**
- * Simulator组件 - 在iframe中隔离渲染
+ * Simulator组件 - iframe隔离渲染
+ * 
+ * 工作原理：
+ * 1. 创建一个独立的iframe
+ * 2. 写入基础HTML结构和样式
+ * 3. 注入React和组件库
+ * 4. 在iframe中渲染schema
+ * 5. 通过postMessage处理交互
  */
 const Simulator: React.FC<SimulatorProps> = ({
     schema,
@@ -29,7 +49,10 @@ const Simulator: React.FC<SimulatorProps> = ({
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [iframeReady, setIframeReady] = useState(false);
 
-    // 初始化iframe
+    /**
+     * 步骤1：初始化iframe
+     * 创建独立的HTML文档环境
+     */
     useEffect(() => {
         const iframe = iframeRef.current;
         if (!iframe) return;
@@ -38,19 +61,45 @@ const Simulator: React.FC<SimulatorProps> = ({
             const iframeDoc = iframe.contentDocument;
             if (!iframeDoc) return;
 
-            // 写入基础HTML结构
+            // 写入完整的HTML结构
+            // 这是一个完全独立的HTML文档
             iframeDoc.open();
             iframeDoc.write(`
         <!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>预览</title>
             <style>
-              * { margin: 0; padding: 0; box-sizing: border-box; }
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-              .simulator-root { padding: 20px; min-height: 100vh; }
-              .node-wrapper { position: relative; }
-              .node-wrapper.selected { outline: 2px solid #1890ff; outline-offset: 2px; }
+              /* iframe内部的样式 - 不会影响外部编辑器 */
+              * { 
+                margin: 0; 
+                padding: 0; 
+                box-sizing: border-box; 
+              }
+              
+              body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                background: #fff;
+              }
+              
+              .simulator-root { 
+                padding: 20px; 
+                min-height: 100vh; 
+              }
+              
+              /* 节点选中效果 */
+              .node-wrapper { 
+                position: relative; 
+              }
+              
+              .node-wrapper.selected { 
+                outline: 2px solid #1890ff; 
+                outline-offset: 2px; 
+              }
+              
+              /* 节点操作工具栏 */
               .node-toolbar {
                 position: absolute;
                 top: -30px;
@@ -60,6 +109,7 @@ const Simulator: React.FC<SimulatorProps> = ({
                 border-radius: 4px;
                 padding: 4px;
               }
+              
               .delete-btn {
                 background: transparent;
                 border: none;
@@ -68,7 +118,13 @@ const Simulator: React.FC<SimulatorProps> = ({
                 font-size: 14px;
                 padding: 2px 8px;
               }
-              .delete-btn:hover { background: rgba(255,255,255,0.2); }
+              
+              .delete-btn:hover { 
+                background: rgba(255,255,255,0.2); 
+              }
+              
+              /* 用户可能添加的全局样式示例 */
+              /* 这些样式只会影响iframe内部，不会污染编辑器 */
             </style>
           </head>
           <body>
@@ -85,7 +141,10 @@ const Simulator: React.FC<SimulatorProps> = ({
         return () => iframe.removeEventListener('load', initIframe);
     }, []);
 
-    // 渲染内容到iframe
+    /**
+     * 步骤2：渲染内容到iframe
+     * 将schema转换为React组件并在iframe中渲染
+     */
     useEffect(() => {
         if (!iframeReady || !iframeRef.current) return;
 
@@ -96,12 +155,18 @@ const Simulator: React.FC<SimulatorProps> = ({
         const container = iframeDoc.getElementById('simulator-root');
         if (!container) return;
 
-        // 将React和物料组件注入到iframe
+        /**
+         * 关键：将React和组件库注入到iframe的window对象
+         * 这样iframe内的代码就可以访问React和所有组件
+         */
         (iframeWin as any).React = React;
         (iframeWin as any).ReactDOM = ReactDOM;
         (iframeWin as any).MaterialComponents = MaterialComponents;
 
-        // 渲染函数
+        /**
+         * 递归渲染函数
+         * 将ComponentSchema转换为React元素
+         */
         const renderInIframe = (node: ComponentSchema): any => {
             const Component = MaterialComponents[node.componentName as keyof typeof MaterialComponents];
 
@@ -112,13 +177,14 @@ const Simulator: React.FC<SimulatorProps> = ({
             const isSelected = selectedNodeId === node.id;
             const isContainer = materialRegistry.isContainer(node.componentName);
 
-            // 处理事件（事件代理到主窗口）
+            // 处理事件（从schema中的事件配置）
             const eventProps: any = {};
             if (node.events) {
                 Object.keys(node.events).forEach(eventName => {
                     const handler = node.events![eventName];
                     if (handler.type === 'JSFunction') {
                         try {
+                            // 执行用户定义的事件处理函数
                             eventProps[eventName] = new Function('return ' + handler.value)();
                         } catch (e) {
                             console.error(`Event handler error:`, e);
@@ -127,7 +193,7 @@ const Simulator: React.FC<SimulatorProps> = ({
                 });
             }
 
-            // 点击事件代理
+            // 节点包装器属性（用于选中和交互）
             const wrapperProps = {
                 className: `node-wrapper ${isSelected ? 'selected' : ''}`,
                 onClick: (e: any) => {
@@ -136,6 +202,7 @@ const Simulator: React.FC<SimulatorProps> = ({
                 }
             };
 
+            // 选中节点的删除按钮
             const toolbar = isSelected && node.id !== 'root'
                 ? React.createElement('div',
                     { className: 'node-toolbar' },
@@ -149,21 +216,29 @@ const Simulator: React.FC<SimulatorProps> = ({
                 )
                 : null;
 
+            // 递归渲染子节点（如果是容器组件）
             const children = isContainer && node.children
-                ? node.children.map((child, index) =>
-                    React.cloneElement(renderInIframe(child), { key: child.id || index })
-                )
+                ? node.children.map((child) => {
+                    const childElement = renderInIframe(child);
+                    return childElement;
+                })
                 : null;
 
+            // 创建React元素
             return React.createElement(
                 'div',
-                wrapperProps,
+                { ...wrapperProps, key: node.id },
                 toolbar,
-                React.createElement(Component, { ...node.props, ...eventProps }, children)
+                React.createElement(Component, { ...node.props, ...eventProps, key: `comp-${node.id}` },
+                    children ? children.map((c, i) => React.cloneElement(c, { key: node.children![i].id || i })) : null
+                )
             );
         };
 
-        // 使用iframe的React渲染
+        /**
+         * 使用iframe window中的React和ReactDOM进行渲染
+         * 这样渲染出的内容完全在iframe的上下文中
+         */
         const rootElement = renderInIframe(schema);
         (iframeWin as any).ReactDOM.render(rootElement, container);
 
@@ -173,7 +248,7 @@ const Simulator: React.FC<SimulatorProps> = ({
         <iframe
             ref={iframeRef}
             className={styles.iframe}
-            title="Simulator"
+            title="Simulator - iframe隔离渲染"
         />
     );
 };
