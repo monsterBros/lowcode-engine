@@ -21,13 +21,61 @@ const Canvas: React.FC = () => {
 
     // 渲染模式：'normal' 或 'iframe'
     const [useSimulator, setUseSimulator] = useState(false);
+    const [currentDragMaterial, setCurrentDragMaterial] = useState<any>(null);
 
+    /**
+     * 监听iframe的postMessage
+     * iframe会通过postMessage通知主窗口drop事件
+     */
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.data.type === 'IFRAME_DROP') {
+                const { material, position } = event.data;
+                console.log('📬 Received drop from iframe:', material, position);
+
+                // 创建新节点
+                const defaultProps: Record<string, any> = {};
+                material.props.forEach((prop: any) => {
+                    if (prop.defaultValue !== undefined) {
+                        defaultProps[prop.name] = prop.defaultValue;
+                    }
+                });
+
+                const newNode: ComponentSchema = {
+                    id: generateId(),
+                    componentName: material.componentName,
+                    props: defaultProps,
+                    children: material.configure?.component?.isContainer ? [] : undefined,
+                };
+
+                console.log('➕ Adding node from iframe drop:', newNode);
+                addNode('root', newNode);
+                setCurrentDragMaterial(null);
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [addNode]);
+
+    /**
+     * 拖拽处理逻辑
+     * 在两种模式下都能正常工作
+     */
     const [{ isOver }, drop] = useDrop({
         accept: 'MATERIAL',
         drop: (item: any) => {
             const { material } = item;
 
-            // 创建新节点，使用物料的默认props
+            console.log('🎯 Drop triggered, material:', material);
+
+            // 如果是iframe模式，不在这里处理，而是由iframe的postMessage处理
+            if (useSimulator) {
+                console.log('⏩ Skipping drop in iframe mode, waiting for postMessage');
+                return;
+            }
+
+            // 普通模式：直接添加
             const defaultProps: Record<string, any> = {};
             material.props.forEach((prop: any) => {
                 if (prop.defaultValue !== undefined) {
@@ -42,13 +90,38 @@ const Canvas: React.FC = () => {
                 children: material.configure?.component?.isContainer ? [] : undefined,
             };
 
-            // 添加到根节点
+            console.log('➕ Adding new node:', newNode);
             addNode('root', newNode);
+            console.log('✅ Node added to schema');
         },
-        collect: (monitor) => ({
-            isOver: monitor.isOver(),
-        }),
+        collect: (monitor) => {
+            const item = monitor.getItem();
+            // 更新当前拖拽的物料
+            if (item && monitor.isDragging()) {
+                setCurrentDragMaterial(item.material);
+            } else if (!monitor.isDragging()) {
+                setCurrentDragMaterial(null);
+            }
+            return {
+                isOver: monitor.isOver(),
+            };
+        },
     });
+
+    /**
+     * 将拖拽数据传递给iframe
+     * 通过自定义data属性传递
+     */
+    useEffect(() => {
+        if (currentDragMaterial && useSimulator) {
+            const iframe = document.querySelector('iframe');
+            if (iframe && iframe.contentWindow) {
+                // 设置拖拽数据到iframe
+                (iframe.contentWindow as any).__dragMaterial = currentDragMaterial;
+                console.log('📤 Sent material to iframe:', currentDragMaterial);
+            }
+        }
+    }, [currentDragMaterial, useSimulator]);
 
     return (
         <div className={styles.canvasWrapper}>

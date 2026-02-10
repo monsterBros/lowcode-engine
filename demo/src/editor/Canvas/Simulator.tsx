@@ -59,7 +59,8 @@ const Simulator: React.FC<SimulatorProps> = ({
 
         const initIframe = () => {
             const iframeDoc = iframe.contentDocument;
-            if (!iframeDoc) return;
+            const iframeWin = iframe.contentWindow;
+            if (!iframeDoc || !iframeWin) return;
 
             // 写入完整的HTML结构
             // 这是一个完全独立的HTML文档
@@ -87,6 +88,25 @@ const Simulator: React.FC<SimulatorProps> = ({
               .simulator-root { 
                 padding: 20px; 
                 min-height: 100vh; 
+              }
+              
+              /* 拖拽提示层样式 */
+              .drag-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(24, 144, 255, 0.1);
+                border: 2px dashed #1890ff;
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                color: #1890ff;
+                font-weight: 600;
+                pointer-events: none;
               }
               
               /* 节点选中效果 */
@@ -122,19 +142,80 @@ const Simulator: React.FC<SimulatorProps> = ({
               .delete-btn:hover { 
                 background: rgba(255,255,255,0.2); 
               }
-              
-              /* 用户可能添加的全局样式示例 */
-              /* 这些样式只会影响iframe内部，不会污染编辑器 */
             </style>
           </head>
           <body>
             <div id="simulator-root" class="simulator-root"></div>
+            <div id="drag-overlay" class="drag-overlay" style="display: none;">
+              🎯 松开鼠标添加组件
+            </div>
           </body>
         </html>
       `);
             iframeDoc.close();
 
+            /**
+             * 关键：在iframe内部监听主窗口的拖拽状态
+             * 
+             * 方案：通过window.parent访问主窗口
+             * 原理：iframe可以访问parent.window来监听主窗口事件
+             */
+
+            // 存储拖拽状态
+            let isDragging = false;
+            let dragData: any = null;
+
+            // 监听主窗口的自定义事件
+            const handleDragStart = (e: any) => {
+                isDragging = true;
+                dragData = e.detail;
+                const overlay = iframeDoc.getElementById('drag-overlay');
+                if (overlay) {
+                    overlay.style.display = 'flex';
+                }
+                console.log('🎯 Drag started in iframe, data:', dragData);
+            };
+
+            const handleDragEnd = (e: any) => {
+                isDragging = false;
+                const overlay = iframeDoc.getElementById('drag-overlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                }
+                console.log('🎯 Drag ended in iframe');
+            };
+
+            const handleDrop = (e: any) => {
+                if (isDragging && dragData) {
+                    console.log('🎯 Drop in iframe! Data:', dragData);
+                    // 通过postMessage通知主窗口
+                    window.parent.postMessage({
+                        type: 'IFRAME_DROP',
+                        material: dragData,
+                        position: { x: e.clientX, y: e.clientY }
+                    }, '*');
+                }
+                isDragging = false;
+                dragData = null;
+                const overlay = iframeDoc.getElementById('drag-overlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                }
+            };
+
+            // 在iframe的document上监听
+            iframeWin.addEventListener('dragenter', handleDragStart);
+            iframeWin.addEventListener('dragleave', handleDragEnd);
+            iframeDoc.addEventListener('drop', handleDrop);
+            iframeDoc.addEventListener('dragover', (e) => e.preventDefault());
+
             setIframeReady(true);
+
+            return () => {
+                iframeWin.removeEventListener('dragenter', handleDragStart);
+                iframeWin.removeEventListener('dragleave', handleDragEnd);
+                iframeDoc.removeEventListener('drop', handleDrop);
+            };
         };
 
         iframe.addEventListener('load', initIframe);
