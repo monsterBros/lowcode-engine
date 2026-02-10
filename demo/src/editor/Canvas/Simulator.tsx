@@ -186,21 +186,37 @@ const Simulator: React.FC<SimulatorProps> = ({
             };
 
             const handleDrop = (e: any) => {
-                if (isDragging && dragData) {
-                    console.log('🎯 Drop in iframe! Data:', dragData);
-                    // 通过postMessage通知主窗口
-                    window.parent.postMessage({
-                        type: 'IFRAME_DROP',
-                        material: dragData,
-                        position: { x: e.clientX, y: e.clientY }
-                    }, '*');
-                }
-                isDragging = false;
-                dragData = null;
+                e.preventDefault();
+                e.stopPropagation();
+
+                // 隐藏提示层
                 const overlay = iframeDoc.getElementById('drag-overlay');
                 if (overlay) {
                     overlay.style.display = 'none';
                 }
+
+                // 从window获取拖拽的物料数据
+                const material = (iframeWin as any).__dragMaterial;
+
+                if (material) {
+                    console.log('🎯 Drop in iframe! Material:', material);
+                    console.log('📍 Drop position:', { x: e.clientX, y: e.clientY });
+
+                    // 通过postMessage通知主窗口
+                    window.parent.postMessage({
+                        type: 'IFRAME_DROP',
+                        material: material,
+                        position: { x: e.clientX, y: e.clientY }
+                    }, '*');
+
+                    // 清空拖拽数据
+                    (iframeWin as any).__dragMaterial = null;
+                } else {
+                    console.warn('⚠️ No material data found in iframe window on drop');
+                }
+
+                isDragging = false;
+                dragData = null;
             };
 
             // 在iframe的document上监听
