@@ -103,8 +103,8 @@ const Toolbar: React.FC = () => {
             </div>
 
             <ComponentImport
-                isOpen={importModalVisible}
-                onClose={() => setImportModalVisible(false)}
+                isOpen={showImport}
+                onClose={() => setShowImport(false)}
                 onSuccess={(componentName) => {
                     message.success(`组件 ${componentName} 已可用！`);
                 }}
