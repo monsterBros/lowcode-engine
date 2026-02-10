@@ -56,6 +56,34 @@ class MaterialRegistry {
         const material = this.getMaterial(componentName);
         return material?.configure?.component?.isContainer || false;
     }
+
+    /**
+     * 注册单个组件（别名，更简洁）
+     */
+    register(material: MaterialMeta): void {
+        this.registerMaterial(material);
+    }
+
+    /**
+     * 卸载组件
+     */
+    unregister(componentName: string): boolean {
+        return this.materials.delete(componentName);
+    }
+
+    /**
+     * 检查组件是否已注册
+     */
+    has(componentName: string): boolean {
+        return this.materials.has(componentName);
+    }
+
+    /**
+     * 获取所有组件（别名）
+     */
+    getAll(): MaterialMeta[] {
+        return this.getAllMaterials();
+    }
 }
 
 // 导出单例

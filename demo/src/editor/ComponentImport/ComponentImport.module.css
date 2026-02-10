@@ -1,0 +1,46 @@
+.tabContent {
+  padding: 8px 0;
+}
+
+.validationResult {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.errorList,
+.warningList {
+  margin-top: 16px;
+}
+
+.errorItem,
+.warningItem {
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.errorItem {
+  background-color: #fff1f0;
+  border-left: 3px solid #ff4d4f;
+}
+
+.warningItem {
+  background-color: #fffbe6;
+  border-left: 3px solid #faad14;
+}
+
+.errorMessage,
+.warningMessage {
+  margin-top: 4px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.suggestion {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.65);
+}

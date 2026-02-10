@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Space, message } from 'antd';
-import { SaveOutlined, EyeOutlined, ExportOutlined, UndoOutlined, RedoOutlined } from '@ant-design/icons';
+import { SaveOutlined, EyeOutlined, ExportOutlined, UndoOutlined, RedoOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEditor } from '@/store/EditorContext';
 import CodeExport from './CodeExport';
+import ComponentImport from '@/editor/ComponentImport/ComponentImport';
 import styles from './Toolbar.module.css';
 
 const Toolbar: React.FC = () => {
     const { schema, undo, redo, canUndo, canRedo } = useEditor();
+    const [showImport, setShowImport] = useState(false);
 
     // 快捷键支持
     useEffect(() => {
@@ -80,6 +82,13 @@ const Toolbar: React.FC = () => {
                     >
                         重做
                     </Button>
+                    <Button
+                        icon={<PlusCircleOutlined />}
+                        onClick={() => setShowImport(true)}
+                        type="dashed"
+                    >
+                        导入组件
+                    </Button>
                     <Button icon={<SaveOutlined />} onClick={handleSave}>
                         保存
                     </Button>
@@ -92,6 +101,14 @@ const Toolbar: React.FC = () => {
                     </Button>
                 </Space>
             </div>
+
+            <ComponentImport
+                visible={showImport}
+                onClose={() => setShowImport(false)}
+                onSuccess={(componentName) => {
+                    message.success(`组件 ${componentName} 已可用！`);
+                }}
+            />
         </div>
     );
 };
