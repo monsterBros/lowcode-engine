@@ -1,0 +1,50 @@
+.versionHistory {
+    padding: 16px;
+    height: 100%;
+    overflow: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.versionItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.versionInfo {
+    flex: 1;
+}
+
+.message {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.author {
+    font-size: 12px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.empty {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-size: 14px;
+}

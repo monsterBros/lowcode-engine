@@ -11,6 +11,8 @@ import { variableManager } from './VariableManager';
 import { i18nManager } from './I18nManager';
 import { widgetManager, Widget } from './WidgetManager';
 import { workspaceManager } from './WorkspaceManager';
+import { versionManager } from './VersionManager';
+import { collaborationManager, User } from './CollaborationManager';
 import { engine, setEditorContext } from '@/shell/api';
 
 export interface EngineConfig {
@@ -51,6 +53,12 @@ export interface EngineConfig {
             title: string;
             schema: any;
         }>;
+    };
+
+    // 协作配置
+    collaboration?: {
+        enabled?: boolean;
+        currentUser?: User;
     };
 
     // 其他配置
@@ -103,13 +111,16 @@ export class Ignitor {
             // 7. 初始化Workspace
             await this.initWorkspace();
 
-            // 8. 加载插件
+            // 8. 初始化协作系统
+            await this.initCollaboration();
+
+            // 9. 加载插件
             await this.loadPlugins();
 
-            // 9. 设置主题
+            // 10. 设置主题
             this.applyTheme();
 
-            // 10. 触发ready事件
+            // 11. 触发ready事件
             eventBus.emit('engine:ready');
 
             this.initialized = true;
@@ -339,6 +350,32 @@ export class Ignitor {
     }
 
     /**
+     * 初始化协作系统
+     */
+    private async initCollaboration() {
+        console.log('🤝 Initializing Collaboration...');
+
+        const collabConfig = this.config.collaboration;
+
+        if (collabConfig?.enabled) {
+            // 设置当前用户
+            if (collabConfig.currentUser) {
+                collaborationManager.setCurrentUser(collabConfig.currentUser);
+            } else {
+                // 默认用户
+                collaborationManager.setCurrentUser({
+                    id: 'user_default',
+                    name: '默认用户',
+                    color: '#1890ff'
+                });
+            }
+            console.log('  Collaboration enabled');
+        } else {
+            console.log('  Collaboration disabled');
+        }
+    }
+
+    /**
      * 加载插件
      */
     private async loadPlugins() {
@@ -378,6 +415,8 @@ export class Ignitor {
         console.log(`  Commands: ${commandManager.getAll().length}`);
         console.log(`  Variables: ${variableManager.getAll().length}`);
         console.log(`  Pages: ${workspaceManager.getPageCount()}`);
+        console.log(`  Versions: ${versionManager.getVersionCount()}`);
+        console.log(`  Online Users: ${collaborationManager.getOnlineUsers().length}`);
         console.log(`  Locale: ${i18nManager.getCurrentLocale()}`);
         console.log('');
     }
