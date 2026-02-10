@@ -9,6 +9,7 @@ import { pluginManager } from './PluginManager';
 import { commandManager, Command } from './CommandManager';
 import { variableManager } from './VariableManager';
 import { i18nManager } from './I18nManager';
+import { widgetManager, Widget } from './WidgetManager';
 import { engine, setEditorContext } from '@/shell/api';
 
 export interface EngineConfig {
@@ -39,6 +40,9 @@ export interface EngineConfig {
         locale?: string;       // 默认语言
         messages?: any;        // 自定义语言包
     };
+
+    // Widget配置
+    widgets?: Widget[];      // 自定义Widget列表
 
     // 其他配置
     theme?: 'light' | 'dark';
@@ -84,13 +88,16 @@ export class Ignitor {
             // 5. 注册命令
             await this.registerCommands();
 
-            // 6. 加载插件
+            // 6. 注册Widget
+            await this.registerWidgets();
+
+            // 7. 加载插件
             await this.loadPlugins();
 
-            // 7. 设置主题
+            // 8. 设置主题
             this.applyTheme();
 
-            // 8. 触发ready事件
+            // 9. 触发ready事件
             eventBus.emit('engine:ready');
 
             this.initialized = true;
@@ -254,83 +261,104 @@ export class Ignitor {
                 description: '粘贴',
                 execute: () => {
                     eventBus.emit('command:paste');
+                    commandManager.registerBatch(defaultCommands);
+                    console.log(`  Registered ${defaultCommands.length} default commands`);
                 }
-            }
-        ];
 
-        commandManager.registerBatch(defaultCommands);
-        console.log(`  Registered ${defaultCommands.length} default commands`);
-    }
+    /**
+     * 注册Widget
+     */
+    private async registerWidgets() {
+                    console.log('📦 Registering widgets...');
+
+                    // 注册默认Widget
+                    this.registerDefaultWidgets();
+
+                    // 注册自定义Widget
+                    if (this.config.widgets) {
+                        widgetManager.registerBatch(this.config.widgets);
+                        console.log(`  Registered ${this.config.widgets.length} custom widgets`);
+                    }
+                }
+
+    /**
+     * 注册默认Widget
+     */
+    private registerDefaultWidgets() {
+                    // 这里可以注册一些内置的默认Widget
+                    // 例如变量面板、快捷键面板等
+                    console.log('  Registered default widgets');
+                }
 
     /**
      * 加载插件
      */
     private async loadPlugins() {
-        console.log('🔌 Loading plugins...');
+                    console.log('🔌 Loading plugins...');
 
-        const pluginsConfig = this.config.plugins;
+                    const pluginsConfig = this.config.plugins;
 
-        if (pluginsConfig?.autoLoad && pluginsConfig.list) {
-            for (const pluginName of pluginsConfig.list) {
-                try {
-                    // 这里可以实现动态加载插件
-                    console.log(`  Loading plugin: ${pluginName}`);
-                } catch (error) {
-                    console.warn(`  Failed to load plugin ${pluginName}:`, error);
+                    if (pluginsConfig?.autoLoad && pluginsConfig.list) {
+                        for (const pluginName of pluginsConfig.list) {
+                            try {
+                                // 这里可以实现动态加载插件
+                                console.log(`  Loading plugin: ${pluginName}`);
+                            } catch (error) {
+                                console.warn(`  Failed to load plugin ${pluginName}:`, error);
+                            }
+                        }
+                    }
                 }
-            }
-        }
-    }
 
     /**
      * 应用主题
      */
     private applyTheme() {
-        if (this.config.theme) {
-            document.body.classList.add(`theme-${this.config.theme}`);
-            console.log(`🎨 Applied theme: ${this.config.theme}`);
-        }
-    }
+                    if (this.config.theme) {
+                        document.body.classList.add(`theme-${this.config.theme}`);
+                        console.log(`🎨 Applied theme: ${this.config.theme}`);
+                    }
+                }
 
     /**
      * 打印引擎信息
      */
     private printInfo() {
-        console.log('\n📊 Engine Information:');
-        console.log(`  Materials: ${materialRegistry.getAll().length}`);
-        console.log(`  Plugins: ${pluginManager.getAll().length}`);
-        console.log(`  Commands: ${commandManager.getAll().length}`);
-        console.log(`  Variables: ${variableManager.getAll().length}`);
-        console.log(`  Locale: ${i18nManager.getCurrentLocale()}`);
-        console.log('');
-    }
+                    console.log('\n📊 Engine Information:');
+                    console.log(`  Materials: ${materialRegistry.getAll().length}`);
+                    console.log(`  Plugins: ${pluginManager.getAll().length}`);
+                    console.log(`  Commands: ${commandManager.getAll().length}`);
+                    console.log(`  Variables: ${variableManager.getAll().length}`);
+                    console.log(`  Locale: ${i18nManager.getCurrentLocale()}`);
+                    console.log('');
+                }
 
     /**
      * 销毁引擎
      */
     async destroy() {
-        console.log('🛑 Destroying engine...');
+                    console.log('🛑 Destroying engine...');
 
-        // 清空各种管理器
-        variableManager.clear();
-        commandManager.clearHistory();
+                    // 清空各种管理器
+                    variableManager.clear();
+                    commandManager.clearHistory();
 
-        this.initialized = false;
-        console.log('✅ Engine destroyed');
-    }
+                    this.initialized = false;
+                    console.log('✅ Engine destroyed');
+                }
 
     /**
      * 检查是否已初始化
      */
     isInitialized(): boolean {
-        return this.initialized;
-    }
-}
+                    return this.initialized;
+                }
+            }
 
 // 导出单例
 export const ignitor = new Ignitor();
 
-// 导出全局API
-if (typeof window !== 'undefined') {
-    (window as any).ignitor = ignitor;
-}
+        // 导出全局API
+        if (typeof window !== 'undefined') {
+            (window as any).ignitor = ignitor;
+        }
