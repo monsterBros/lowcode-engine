@@ -116,15 +116,18 @@ const Canvas: React.FC = () => {
 
     /**
      * 将拖拽数据传递给iframe
-     * 通过自定义data属性传递
+     * 使用postMessage进行跨iframe通信（标准做法）
      */
     useEffect(() => {
         if (currentDragMaterial && useSimulator) {
             const iframe = document.querySelector('iframe');
             if (iframe && iframe.contentWindow) {
-                // 设置拖拽数据到iframe
-                (iframe.contentWindow as any).__dragMaterial = currentDragMaterial;
-                console.log('📤 Sent material to iframe:', currentDragMaterial);
+                // 通过postMessage发送拖拽数据到iframe
+                iframe.contentWindow.postMessage({
+                    type: 'DRAG_MATERIAL',
+                    material: currentDragMaterial
+                }, '*');
+                console.log('📤 Sent material to iframe via postMessage:', currentDragMaterial);
             }
         }
     }, [currentDragMaterial, useSimulator]);

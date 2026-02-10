@@ -226,12 +226,6 @@ const Simulator: React.FC<SimulatorProps> = ({
             iframeDoc.addEventListener('dragover', (e) => e.preventDefault());
 
             setIframeReady(true);
-
-            return () => {
-                iframeWin.removeEventListener('dragenter', handleDragStart);
-                iframeWin.removeEventListener('dragleave', handleDragEnd);
-                iframeDoc.removeEventListener('drop', handleDrop);
-            };
         };
 
         iframe.addEventListener('load', initIframe);
