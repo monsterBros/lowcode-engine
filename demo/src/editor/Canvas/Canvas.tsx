@@ -90,15 +90,56 @@ const Canvas: React.FC = () => {
             </div>
 
             {/* 画布区域 */}
-            <div ref={drop} className={`${styles.canvas} ${isOver ? styles.isOver : ''}`}>
+            <div
+                ref={drop}
+                className={`${styles.canvas} ${isOver ? styles.isOver : ''}`}
+                style={{
+                    position: 'relative',
+                }}
+            >
                 {useSimulator ? (
-                    // iframe隔离模式 - 完全隔离的渲染环境
-                    <Simulator
-                        schema={schema}
-                        selectedNodeId={selectedNodeId}
-                        onNodeSelect={setSelectedNodeId}
-                        onNodeDelete={deleteNode}
-                    />
+                    <>
+                        {/* iframe隔离模式 - 完全隔离的渲染环境 */}
+                        <Simulator
+                            schema={schema}
+                            selectedNodeId={selectedNodeId}
+                            onNodeSelect={setSelectedNodeId}
+                            onNodeDelete={deleteNode}
+                        />
+
+                        {/* 
+                            关键：拖拽时的透明覆盖层
+                            
+                            问题：iframe会阻挡外层的drop事件
+                            解决：拖拽时在iframe上方显示一个透明div来接收drop
+                            
+                            原理：
+                            - isOver=true时显示
+                            - 完全覆盖iframe
+                            - 透明但能接收drop事件
+                            - drop事件由外层div的ref={drop}处理
+                        */}
+                        {isOver && (
+                            <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                background: 'rgba(24, 144, 255, 0.1)',
+                                border: '2px dashed #1890ff',
+                                zIndex: 1000,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '18px',
+                                color: '#1890ff',
+                                fontWeight: 600,
+                            }}>
+                                🎯 松开鼠标添加组件到页面
+                            </div>
+                        )}
+                    </>
                 ) : (
                     // 普通渲染模式 - 直接渲染，支持拖拽
                     <Renderer schema={schema} />
