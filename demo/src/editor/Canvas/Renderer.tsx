@@ -44,7 +44,66 @@ const Renderer: React.FC<RendererProps> = ({ schema }) => {
         addNode(containerId, newNode);
     };
 
-    const renderNode = (node: ComponentSchema): React.ReactNode => {
+    const renderNode = (node: ComponentSchema, loopContext?: any): React.ReactNode => {
+        // 1. 条件渲染：如果有condition且不满足，直接返回null
+        if (node.condition) {
+            const { expressionEngine } = require('@/engine/ExpressionEngine');
+            const context = {
+                state: {},  // TODO: 从EditorContext获取state
+                props: node.props,
+                ...loopContext
+            };
+            const shouldRender = expressionEngine.parseValue(node.condition, context);
+            if (!shouldRender) {
+                return null;
+            }
+        }
+
+        // 2. 循环渲染：如果有loop，渲染多个副本
+        if (node.loop) {
+            const { expressionEngine } = require('@/engine/ExpressionEngine');
+            const context = {
+                state: {},  // TODO: 从EditorContext获取state
+                props: node.props,
+                ...loopContext
+            };
+
+            // 获取数据源
+            const dataSource = expressionEngine.parseValue(
+                node.loop.dataSource,
+                context
+            );
+
+            if (!Array.isArray(dataSource)) {
+                console.warn('Loop dataSource is not an array:', dataSource);
+                return null;
+            }
+
+            const itemName = node.loop.itemName || 'item';
+            const indexName = node.loop.indexName || 'index';
+
+            // 渲染每一项
+            return (
+                <>
+                    {dataSource.map((item, index) => {
+                        const newLoopContext = {
+                            ...loopContext,
+                            [itemName]: item,
+                            [indexName]: index
+                        };
+                        // 递归渲染，但不带loop配置（避免无限循环）
+                        const loopNode = { ...node, loop: undefined };
+                        return (
+                            <React.Fragment key={`${node.id}-${index}`}>
+                                {renderNode(loopNode, newLoopContext)}
+                            </React.Fragment>
+                        );
+                    })}
+                </>
+            );
+        }
+
+        // 3. 正常渲染
         const Component = MaterialComponents[node.componentName as keyof typeof MaterialComponents];
 
         if (!Component) {
@@ -94,7 +153,7 @@ const Renderer: React.FC<RendererProps> = ({ schema }) => {
                 )}
                 <Component {...node.props} {...eventProps} {...containerProps}>
                     {isContainer && node.children && node.children.length > 0
-                        ? node.children.map((child) => renderNode(child))
+                        ? node.children.map((child) => renderNode(child, loopContext))
                         : null}
                 </Component>
             </div>

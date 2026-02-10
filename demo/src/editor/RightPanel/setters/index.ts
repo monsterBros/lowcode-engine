@@ -25,3 +25,57 @@ export { default as IconSetter } from './IconSetter';
 // 高级Setter (2种)
 export { default as StyleSetter } from './StyleSetter';
 export { default as MixedSetter } from './MixedSetter';
+
+// 动态渲染Setter (2种)
+export { default as ConditionSetter } from './ConditionSetter';
+export { default as LoopSetter } from './LoopSetter';
+
+// 导入所有Setter用于映射
+import StringSetter from './StringSetter';
+import NumberSetter from './NumberSetter';
+import BooleanSetter from './BooleanSetter';
+import SelectSetter from './SelectSetter';
+import ColorSetter from './ColorSetter';
+import DateSetter from './DateSetter';
+import TimeSetter from './TimeSetter';
+import TextAreaSetter from './TextAreaSetter';
+import SliderSetter from './SliderSetter';
+import RateSetter from './RateSetter';
+import SwitchSetter from './SwitchSetter';
+import ClassNameSetter from './ClassNameSetter';
+import ArraySetter from './ArraySetter';
+import JSONSetter from './JSONSetter';
+import FunctionSetter from './FunctionSetter';
+import ExpressionSetter from './ExpressionSetter';
+import ImageSetter from './ImageSetter';
+import IconSetter from './IconSetter';
+import StyleSetter from './StyleSetter';
+import MixedSetter from './MixedSetter';
+import ConditionSetter from './ConditionSetter';
+import LoopSetter from './LoopSetter';
+
+// Setter映射表
+export const SetterMap = {
+    StringSetter,
+    NumberSetter,
+    BooleanSetter,
+    SelectSetter,
+    ColorSetter,
+    DateSetter,
+    TimeSetter,
+    TextAreaSetter,
+    SliderSetter,
+    RateSetter,
+    SwitchSetter,
+    ClassNameSetter,
+    ArraySetter,
+    JSONSetter,
+    FunctionSetter,
+    ExpressionSetter,
+    ImageSetter,
+    IconSetter,
+    StyleSetter,
+    MixedSetter,
+    ConditionSetter,
+    LoopSetter,
+};

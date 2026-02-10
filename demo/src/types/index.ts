@@ -7,6 +7,24 @@ export interface ComponentSchema {
     props?: Record<string, any>;
     events?: Record<string, EventHandler>;
     children?: ComponentSchema[];
+
+    // 条件渲染
+    condition?: JSExpression;
+
+    // 循环渲染
+    loop?: {
+        dataSource: JSExpression | any[];  // 数据源
+        itemName?: string;                 // 循环项变量名，默认'item'
+        indexName?: string;                // 索引变量名，默认'index'
+    };
+}
+
+/**
+ * JSExpression类型
+ */
+export interface JSExpression {
+    type: 'JSExpression';
+    value: string;  // 表达式字符串，如 "state.count > 0"
 }
 
 /**
