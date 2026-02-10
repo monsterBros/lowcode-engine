@@ -30,6 +30,12 @@ export { default as MixedSetter } from './MixedSetter';
 export { default as ConditionSetter } from './ConditionSetter';
 export { default as LoopSetter } from './LoopSetter';
 
+// 高级功能Setter (4种)
+export { default as VariableBindingSetter } from './VariableBindingSetter';
+export { default as LinkageSetter } from './LinkageSetter';
+export { default as I18nSetter } from './I18nSetter';
+export { default as SlotSetter } from './SlotSetter';
+
 // 导入所有Setter用于映射
 import StringSetter from './StringSetter';
 import NumberSetter from './NumberSetter';
@@ -53,6 +59,10 @@ import StyleSetter from './StyleSetter';
 import MixedSetter from './MixedSetter';
 import ConditionSetter from './ConditionSetter';
 import LoopSetter from './LoopSetter';
+import VariableBindingSetter from './VariableBindingSetter';
+import LinkageSetter from './LinkageSetter';
+import I18nSetter from './I18nSetter';
+import SlotSetter from './SlotSetter';
 
 // Setter映射表
 export const SetterMap = {
@@ -78,4 +88,8 @@ export const SetterMap = {
     MixedSetter,
     ConditionSetter,
     LoopSetter,
+    VariableBindingSetter,
+    LinkageSetter,
+    I18nSetter,
+    SlotSetter,
 };
