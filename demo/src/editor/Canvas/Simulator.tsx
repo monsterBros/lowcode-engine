@@ -238,9 +238,23 @@ const Simulator: React.FC<SimulatorProps> = ({
         /**
          * 使用iframe window中的React和ReactDOM进行渲染
          * 这样渲染出的内容完全在iframe的上下文中
+         * 
+         * 关键：每次schema变化时，这个useEffect都会重新执行
+         * 从而更新iframe中的内容
          */
-        const rootElement = renderInIframe(schema);
-        (iframeWin as any).ReactDOM.render(rootElement, container);
+        try {
+            const rootElement = renderInIframe(schema);
+
+            // 使用iframe的ReactDOM.render
+            // 注意：React 16使用的是render，不是createRoot
+            const container = iframeDoc.getElementById('simulator-root');
+            if (container && iframeWin && (iframeWin as any).ReactDOM) {
+                (iframeWin as any).ReactDOM.render(rootElement, container);
+                console.log('✅ Simulator rendered successfully with schema:', schema);
+            }
+        } catch (error) {
+            console.error('❌ Simulator render error:', error);
+        }
 
     }, [iframeReady, schema, selectedNodeId, onNodeSelect, onNodeDelete]);
 
