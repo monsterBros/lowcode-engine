@@ -150,7 +150,9 @@ const Simulator: React.FC<SimulatorProps> = ({
                 : null;
 
             const children = isContainer && node.children
-                ? node.children.map(child => renderInIframe(child))
+                ? node.children.map((child, index) =>
+                    React.cloneElement(renderInIframe(child), { key: child.id || index })
+                )
                 : null;
 
             return React.createElement(
