@@ -116,7 +116,7 @@ const Toolbar: React.FC = () => {
                 onClose={() => setShowPreview(false)}
                 schema={schema}
             />
-        </>
+        </div>
     );
 };
 
