@@ -98,11 +98,11 @@ const Canvas: React.FC = () => {
             const item = monitor.getItem();
             const isOver = monitor.isOver();
 
-            // 当拖拽开始且有item时，更新物料数据
-            if (item && item.material && isOver) {
+            // 当拖拽开始就更新物料数据（不等待isOver）
+            if (item && item.material) {
                 setCurrentDragMaterial(item.material);
-            } else if (!isOver) {
-                // 拖拽离开时清空
+            } else if (!item) {
+                // 拖拽结束时清空
                 if (currentDragMaterial) {
                     setCurrentDragMaterial(null);
                 }
