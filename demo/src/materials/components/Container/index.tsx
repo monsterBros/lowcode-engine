@@ -1,5 +1,4 @@
 import React from 'react';
-import { useDrop } from 'react-dnd';
 
 interface ContainerProps {
     children?: React.ReactNode;
@@ -21,25 +20,42 @@ const Container: React.FC<ContainerProps> = ({
     nodeId,
     onDropChild
 }) => {
-    // 拖放支持
-    const [{ isOver, canDrop }, drop] = useDrop({
-        accept: 'MATERIAL',
-        drop: (item: any, monitor) => {
-            // 只处理直接拖放到此容器的情况
-            const didDrop = monitor.didDrop();
-            if (didDrop) {
-                return;
-            }
+    // 拖放支持 - 仅在编辑模式下启用
+    let isOver = false;
+    let canDrop = false;
+    let dropRef: any = null;
 
-            if (onDropChild && nodeId) {
-                onDropChild(nodeId, item.material);
-            }
-        },
-        collect: (monitor) => ({
-            isOver: monitor.isOver({ shallow: true }),
-            canDrop: monitor.canDrop(),
-        }),
-    });
+    // 检查是否在DndProvider上下文中
+    let hasDndContext = false;
+    try {
+        // 动态导入useDrop以避免在没有上下文时崩溃
+        const { useDrop } = require('react-dnd');
+        const [dropState, drop] = useDrop({
+            accept: 'MATERIAL',
+            drop: (item: any, monitor) => {
+                // 只处理直接拖放到此容器的情况
+                const didDrop = monitor.didDrop();
+                if (didDrop) {
+                    return;
+                }
+
+                if (onDropChild && nodeId) {
+                    onDropChild(nodeId, item.material);
+                }
+            },
+            collect: (monitor) => ({
+                isOver: monitor.isOver({ shallow: true }),
+                canDrop: monitor.canDrop(),
+            }),
+        });
+        isOver = dropState.isOver;
+        canDrop = dropState.canDrop;
+        dropRef = drop;
+        hasDndContext = true;
+    } catch (e) {
+        // 没有DndProvider上下文，使用普通渲染
+        hasDndContext = false;
+    }
 
     const styles: React.CSSProperties = {
         display: 'flex',
@@ -55,7 +71,7 @@ const Container: React.FC<ContainerProps> = ({
     };
 
     return (
-        <div ref={drop} style={styles}>
+        <div ref={hasDndContext ? dropRef : null} style={styles}>
             {children && React.Children.count(children) > 0
                 ? children
                 : <div style={{ color: '#999', textAlign: 'center', width: '100%' }}>拖拽组件到这里</div>
