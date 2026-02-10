@@ -4,11 +4,13 @@ import { SaveOutlined, EyeOutlined, ExportOutlined, UndoOutlined, RedoOutlined, 
 import { useEditor } from '@/store/EditorContext';
 import CodeExport from './CodeExport';
 import ComponentImport from '@/editor/ComponentImport/ComponentImport';
+import LivePreview from '../Canvas/LivePreview';
 import styles from './Toolbar.module.css';
 
 const Toolbar: React.FC = () => {
     const { schema, undo, redo, canUndo, canRedo } = useEditor();
     const [showImport, setShowImport] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
 
     // 快捷键支持
     useEffect(() => {
@@ -42,8 +44,7 @@ const Toolbar: React.FC = () => {
     };
 
     const handlePreview = () => {
-        message.info('预览功能');
-        console.log('预览Schema:', schema);
+        setShowPreview(true);
     };
 
     const handleExport = () => {
