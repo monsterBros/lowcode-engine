@@ -5,7 +5,7 @@
 
 import { materialRegistry } from '@/materials/registry';
 import { eventBus } from './EventBus';
-import { pluginManager } from './PluginManager';
+import { PluginManager } from './PluginManager';
 import { commandManager, Command } from './CommandManager';
 import { variableManager } from './VariableManager';
 import { i18nManager } from './I18nManager';
@@ -411,7 +411,6 @@ export class Ignitor {
     private printInfo() {
         console.log('\n📊 Engine Information:');
         console.log(`  Materials: ${materialRegistry.getAll().length}`);
-        console.log(`  Plugins: ${pluginManager.getAll().length}`);
         console.log(`  Commands: ${commandManager.getAll().length}`);
         console.log(`  Variables: ${variableManager.getAll().length}`);
         console.log(`  Pages: ${workspaceManager.getPageCount()}`);
