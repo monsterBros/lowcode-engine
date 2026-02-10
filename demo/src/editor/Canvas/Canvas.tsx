@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDrop } from 'react-dnd';
 import { useEditor } from '@/store/EditorContext';
 import { ComponentSchema } from '@/types';
