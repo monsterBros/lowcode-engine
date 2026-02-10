@@ -9,12 +9,12 @@ const { TextArea } = Input;
 const { Panel } = Collapse;
 
 interface ComponentImportProps {
-    visible: boolean;
+    isOpen: boolean;
     onClose: () => void;
     onSuccess?: (componentName: string) => void;
 }
 
-const ComponentImport: React.FC<ComponentImportProps> = ({ visible, onClose, onSuccess }) => {
+const ComponentImport: React.FC<ComponentImportProps> = ({ isOpen, onClose, onSuccess }) => {
     const [activeTab, setActiveTab] = useState('url');
     const [url, setUrl] = useState('');
     const [code, setCode] = useState('');
@@ -170,7 +170,7 @@ const ComponentImport: React.FC<ComponentImportProps> = ({ visible, onClose, onS
     return (
         <Modal
             title="📦 导入第三方组件"
-            visible={visible}
+            open={isOpen}
             onCancel={handleClose}
             width={700}
             footer={null}
