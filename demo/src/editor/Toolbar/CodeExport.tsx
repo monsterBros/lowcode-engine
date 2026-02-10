@@ -37,21 +37,23 @@ const CodeExport: React.FC = () => {
         message.success('代码已下载');
     };
 
-    const handleDownloadProject = () => {
+    const handleDownloadProject = async () => {
         try {
-            const generator = generatorType === 'ast' ? astCodeGenerator : codeGenerator;
-            const files = generator.generateProjectStructure(schema, 'my-app');
-            const jsonStr = JSON.stringify(files, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'project-files.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            message.success('项目文件列表已下载');
+            // 导入ProjectGenerator
+            const { projectGenerator } = await import('@/engine/ProjectGenerator');
+
+            // 生成并下载完整的React项目
+            await projectGenerator.generateProject(schema, {
+                name: 'my-lowcode-app',
+                version: '1.0.0',
+                description: '由低代码引擎生成的React项目',
+                author: ''
+            });
+
+            message.success('React项目已生成并下载！');
         } catch (error) {
-            message.error('项目导出失败：' + (error as Error).message);
+            message.error('项目生成失败：' + (error as Error).message);
+            console.error('Project generation error:', error);
         }
     };
 
@@ -80,7 +82,7 @@ const CodeExport: React.FC = () => {
                         下载代码
                     </Button>,
                     <Button key="project" type="primary" icon={<DownloadOutlined />} onClick={handleDownloadProject}>
-                        下载完整项目
+                        生成React项目(ZIP)
                     </Button>,
                 ]}
             >
