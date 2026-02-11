@@ -30,8 +30,9 @@ const Canvas: React.FC = () => {
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
             if (event.data.type === 'IFRAME_DROP') {
-                const { material, position } = event.data;
+                const { material, parentId, position } = event.data;
                 console.log('📬 Received drop from iframe:', material, position);
+                console.log('📦 Parent container:', parentId || 'root');
 
                 // 创建新节点
                 const defaultProps: Record<string, any> = {};
@@ -49,7 +50,8 @@ const Canvas: React.FC = () => {
                 };
 
                 console.log('➕ Adding node from iframe drop:', newNode);
-                addNode('root', newNode);
+                // 使用iframe传递的parentId，如果没有则默认为root
+                addNode(parentId || 'root', newNode);
                 setCurrentDragMaterial(null);
             }
         };

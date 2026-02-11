@@ -125,10 +125,41 @@ const Simulator: React.FC<SimulatorProps> = ({
                 if (overlay) overlay.style.display = 'none';
 
                 if (currentMaterial) {
+                    /**
+                     * 关键：检测drop目标，找到应该添加到哪个父容器
+                     * 
+                     * 策略：
+                     * 1. 从drop的target元素开始向上查找
+                     * 2. 找到最近的带有data-node-id属性的元素
+                     * 3. 检查该节点是否为容器类型
+                     * 4. 如果是容器，使用该id作为parentId；否则使用root
+                     */
+                    let parentId = 'root'; // 默认添加到root
+                    let targetElement = e.target as HTMLElement;
+
+                    // 向上遍历DOM树查找容器节点
+                    while (targetElement && targetElement !== iframeDoc.body) {
+                        const nodeId = targetElement.getAttribute('data-node-id');
+                        if (nodeId) {
+                            // 检查是否为容器组件（有data-is-container属性）
+                            const isContainer = targetElement.getAttribute('data-is-container') === 'true';
+                            if (isContainer) {
+                                parentId = nodeId;
+                                console.log('📦 Found container:', nodeId);
+                                break;
+                            }
+                        }
+                        targetElement = targetElement.parentElement as HTMLElement;
+                    }
+
                     console.log('🎯 Drop in iframe!', currentMaterial);
+                    console.log('📍 Drop position:', { x: e.clientX, y: e.clientY });
+                    console.log('👉 Target parent:', parentId);
+
                     window.parent.postMessage({
                         type: 'IFRAME_DROP',
                         material: currentMaterial,
+                        parentId: parentId,
                         position: { x: e.clientX, y: e.clientY }
                     }, '*');
                     currentMaterial = null;
@@ -183,6 +214,8 @@ const Simulator: React.FC<SimulatorProps> = ({
 
             const wrapperProps = {
                 className: `node-wrapper ${isSelected ? 'selected' : ''}`,
+                'data-node-id': node.id,
+                'data-is-container': isContainer ? 'true' : 'false',
                 onClick: (e: any) => {
                     e.stopPropagation();
                     onNodeSelect?.(node.id);
