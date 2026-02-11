@@ -10,7 +10,11 @@ const Tree: React.FC = () => {
         <div className={styles.container}>
             <div className={styles.header}>大纲树</div>
             <div className={styles.tree}>
-                <TreeNode node={schema} />
+                <TreeNode
+                    node={schema}
+                    level={0}
+                    index={0}
+                />
             </div>
         </div>
     );
