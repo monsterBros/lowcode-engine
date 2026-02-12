@@ -4,6 +4,7 @@ import { useEditor } from '@/store/EditorContext';
 import { materialRegistry } from '@/materials/registry';
 import MaterialComponents from '@/materials/components';
 import { generateId } from '@/utils/uuid';
+import { expressionEngine } from '@/engine/ExpressionEngine';
 import styles from './Renderer.module.css';
 
 interface RendererProps {
@@ -47,7 +48,6 @@ const Renderer: React.FC<RendererProps> = ({ schema }) => {
     const renderNode = (node: ComponentSchema, loopContext?: any): React.ReactNode => {
         // 1. 条件渲染：如果有condition且不满足，直接返回null
         if (node.condition) {
-            const { expressionEngine } = require('@/engine/ExpressionEngine');
             const context = {
                 state: {},  // TODO: 从EditorContext获取state
                 props: node.props,
@@ -61,7 +61,6 @@ const Renderer: React.FC<RendererProps> = ({ schema }) => {
 
         // 2. 循环渲染：如果有loop，渲染多个副本
         if (node.loop) {
-            const { expressionEngine } = require('@/engine/ExpressionEngine');
             const context = {
                 state: {},  // TODO: 从EditorContext获取state
                 props: node.props,

@@ -89,4 +89,5 @@ export interface EditorActions {
     addNode: (parentId: string | null, node: ComponentSchema) => void;
     deleteNode: (id: string) => void;
     updateNodeProps: (id: string, props: Record<string, any>) => void;
+    moveNode: (nodeId: string, targetParentId: string, targetIndex: number) => void;
 }
