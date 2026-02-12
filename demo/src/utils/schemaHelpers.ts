@@ -1,4 +1,5 @@
 import { ComponentSchema } from '@/types';
+import { findNode, deleteNodeFromSchema } from './schema';
 
 /**
  * 在schema中移动节点
@@ -49,6 +50,3 @@ function insertNodeAtPosition(
 
     return schema;
 }
-
-// Export existing functions
-export { findNode, deleteNodeFromSchema } from './schema';

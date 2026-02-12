@@ -7,7 +7,7 @@ interface ContainerProps {
     background?: string;
     padding?: number;
     gap?: number;
-    // 新增：用于拖放支持
+    // 用于拖放支持 - 仅在编辑器模式下传递
     nodeId?: string;
     onDropChild?: (nodeId: string, material: any) => void;
 }
@@ -22,29 +22,34 @@ const Container: React.FC<ContainerProps> = ({
     onDropChild
 }) => {
     // 拖放支持 - 仅在编辑模式下启用（当有onDropChild回调时）
-    // 使用条件hook确保在没有DndProvider时不会崩溃
-    const shouldEnableDrop = !!onDropChild && !!nodeId;
+    const shouldEnableDrop = Boolean(onDropChild && nodeId);
 
-    const dropResult = shouldEnableDrop ? useDrop({
-        accept: 'MATERIAL',
-        drop: (item: any, monitor) => {
-            // 只处理直接拖放到此容器的情况
-            const didDrop = monitor.didDrop();
-            if (didDrop) {
-                return;
-            }
+    // 条件使用useDrop
+    let isOver = false;
+    let canDrop = false;
+    let dropRef: any = null;
 
-            if (onDropChild && nodeId) {
-                onDropChild(nodeId, item.material);
-            }
-        },
-        collect: (monitor) => ({
-            isOver: monitor.isOver({ shallow: true }),
-            canDrop: monitor.canDrop(),
-        }),
-    }, [onDropChild, nodeId]) : [{ isOver: false, canDrop: false }, null];
+    if (shouldEnableDrop) {
+        const [dropState, drop] = useDrop({
+            accept: 'MATERIAL',
+            drop: (item: any, monitor) => {
+                const didDrop = monitor.didDrop();
+                if (didDrop) return;
 
-    const [{ isOver, canDrop }, drop] = dropResult;
+                if (onDropChild && nodeId) {
+                    onDropChild(nodeId, item.material);
+                }
+            },
+            collect: (monitor) => ({
+                isOver: monitor.isOver({ shallow: true }),
+                canDrop: monitor.canDrop(),
+            }),
+        }, [onDropChild, nodeId]);
+
+        isOver = dropState.isOver;
+        canDrop = dropState.canDrop;
+        dropRef = drop;
+    }
 
     const styles: React.CSSProperties = {
         display: 'flex',
@@ -60,7 +65,7 @@ const Container: React.FC<ContainerProps> = ({
     };
 
     return (
-        <div ref={shouldEnableDrop ? drop : null} style={styles}>
+        <div ref={dropRef} style={styles}>
             {children && React.Children.count(children) > 0
                 ? children
                 : <div style={{ color: '#999', textAlign: 'center', width: '100%' }}>拖拽组件到这里</div>
