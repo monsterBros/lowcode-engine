@@ -6,6 +6,7 @@ import MaterialComponents from '@/materials/components';
 import { generateId } from '@/utils/uuid';
 import { expressionEngine } from '@/engine/ExpressionEngine';
 import { findNode } from '@/utils/schema';
+import { componentEventSystem } from '@/engine/ComponentEventSystem';
 import styles from './Renderer.module.css';
 
 interface RendererProps {
@@ -116,8 +117,6 @@ const Renderer: React.FC<RendererProps> = ({ schema }) => {
         // 处理事件绑定 - 使用增强的组件事件系统
         const eventProps: any = {};
         if (node.events) {
-            const { componentEventSystem } = require('@/engine/ComponentEventSystem');
-
             componentEventSystem.setupComponentEvents(
                 node.id,
                 node.events,
