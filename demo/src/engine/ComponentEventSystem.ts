@@ -14,6 +14,7 @@ export interface EventContext {
     updateNode: (id: string, props: any) => void;        // 更新其他节点
     getState: (key: string) => any;                      // 获取全局状态
     setState: (key: string, value: any) => void;         // 设置全局状态
+    callRef: (id: string, method: string, ...args: any[]) => any; // 调用组件方法
 }
 
 export class ComponentEventSystem {
@@ -30,6 +31,7 @@ export class ComponentEventSystem {
             updateNode: (id: string, props: any) => void;
             getState: (key: string) => any;
             setState: (key: string, value: any) => void;
+            callRef: (id: string, method: string, ...args: any[]) => any;
         }
     ) {
         Object.entries(events).forEach(([eventName, handler]) => {
@@ -51,6 +53,7 @@ export class ComponentEventSystem {
                         updateNode: contextProviders.updateNode,
                         getState: contextProviders.getState,
                         setState: contextProviders.setState,
+                        callRef: contextProviders.callRef,
                     };
 
                     try {

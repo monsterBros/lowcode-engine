@@ -118,6 +118,7 @@ const Renderer: React.FC<RendererProps> = ({ schema }) => {
         const eventProps: any = {};
         if (node.events) {
             const { stateManager } = require('@/engine/StateManager');
+            const { refManager } = require('@/engine/RefManager');
 
             componentEventSystem.setupComponentEvents(
                 node.id,
@@ -126,7 +127,9 @@ const Renderer: React.FC<RendererProps> = ({ schema }) => {
                     getNode: (id: string) => findNode(schema, id),
                     updateNode: updateNodeProps,
                     getState: (key: string) => stateManager.get(key),
-                    setState: (key: string, value: any) => stateManager.set(key, value)
+                    setState: (key: string, value: any) => stateManager.set(key, value),
+                    callRef: (id: string, method: string, ...args: any[]) =>
+                        refManager.callMethod(id, method, ...args)
                 }
             );
 
