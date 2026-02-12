@@ -21,8 +21,11 @@ const Container: React.FC<ContainerProps> = ({
     nodeId,
     onDropChild
 }) => {
-    // 拖放支持 - 仅在编辑模式下启用
-    const [{ isOver, canDrop }, drop] = useDrop({
+    // 拖放支持 - 仅在编辑模式下启用（当有onDropChild回调时）
+    // 使用条件hook确保在没有DndProvider时不会崩溃
+    const shouldEnableDrop = !!onDropChild && !!nodeId;
+
+    const dropResult = shouldEnableDrop ? useDrop({
         accept: 'MATERIAL',
         drop: (item: any, monitor) => {
             // 只处理直接拖放到此容器的情况
@@ -39,7 +42,9 @@ const Container: React.FC<ContainerProps> = ({
             isOver: monitor.isOver({ shallow: true }),
             canDrop: monitor.canDrop(),
         }),
-    }, [onDropChild, nodeId]);
+    }, [onDropChild, nodeId]) : [{ isOver: false, canDrop: false }, null];
+
+    const [{ isOver, canDrop }, drop] = dropResult;
 
     const styles: React.CSSProperties = {
         display: 'flex',
@@ -55,7 +60,7 @@ const Container: React.FC<ContainerProps> = ({
     };
 
     return (
-        <div ref={drop} style={styles}>
+        <div ref={shouldEnableDrop ? drop : null} style={styles}>
             {children && React.Children.count(children) > 0
                 ? children
                 : <div style={{ color: '#999', textAlign: 'center', width: '100%' }}>拖拽组件到这里</div>
