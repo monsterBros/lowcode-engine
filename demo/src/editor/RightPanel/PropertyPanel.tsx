@@ -3,6 +3,7 @@ import { Form } from 'antd';
 import { useEditor } from '@/store/EditorContext';
 import { findNode } from '@/utils/schema';
 import { materialRegistry } from '@/materials/registry';
+import { ComponentSchema } from '@/types';
 import * as Setters from './setters';
 import styles from './PropertyPanel.module.css';
 
@@ -39,7 +40,7 @@ const SetterComponents: Record<string, React.ComponentType<any>> = {
 };
 
 const PropertyPanel: React.FC = () => {
-    const { schema, selectedNodeId, updateNodeProps } = useEditor();
+    const { schema, selectedNodeId, updateNodeProps, updateSchema } = useEditor();
 
     if (!selectedNodeId) {
         return (
@@ -68,15 +69,27 @@ const PropertyPanel: React.FC = () => {
     }
 
     const handleChange = (propName: string, value: any) => {
-        // events属性特殊处理：更新到selectedNode.events而不是props
+        // events属性特殊处理：直接更新selectedNode.events
         if (propName === 'events') {
-            // 需要通过updateNode更新events
-            // 由于当前updateNodeProps只更新props，我们需要特殊处理
-            // 暂时将events存储到props中（后续可以优化）
-            updateNodeProps(selectedNodeId, {
-                [propName]: value,
-            });
+            // 直接修改schema中的events属性
+            const updateEvents = (node: ComponentSchema): ComponentSchema => {
+                if (node.id === selectedNodeId) {
+                    return { ...node, events: value };
+                }
+                if (node.children) {
+                    return {
+                        ...node,
+                        children: node.children.map(updateEvents)
+                    };
+                }
+                return node;
+            };
+
+            const newSchema = updateEvents(schema);
+            updateSchema(newSchema);
+            console.log('✅ Events updated:', { nodeId: selectedNodeId, events: value });
         } else {
+            // 普通属性更新
             updateNodeProps(selectedNodeId, {
                 [propName]: value,
             });
