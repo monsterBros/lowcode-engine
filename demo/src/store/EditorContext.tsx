@@ -126,6 +126,7 @@ export const EditorProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                 addNode,
                 deleteNode,
                 updateNodeProps,
+                updateSchema,
                 moveNode,
                 undo,
                 redo,

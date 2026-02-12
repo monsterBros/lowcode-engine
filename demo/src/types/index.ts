@@ -85,6 +85,7 @@ export interface EditorState {
  */
 export interface EditorActions {
     setSchema: (schema: ComponentSchema) => void;
+    updateSchema: (schema: ComponentSchema, skipHistory?: boolean) => void;
     setSelectedNodeId: (id: string | null) => void;
     addNode: (parentId: string | null, node: ComponentSchema) => void;
     deleteNode: (id: string) => void;
