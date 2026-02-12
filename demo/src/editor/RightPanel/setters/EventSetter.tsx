@@ -133,66 +133,90 @@ const EventSetter: React.FC<EventSetterProps> = ({ value = {}, onChange }) => {
         e => !existingEvents.includes(e.value)
     );
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {/* 已添加的事件列表 */}
-            {existingEvents.length > 0 && (
-                <Collapse
-                    items={existingEvents.map(eventType => ({
-                        key: eventType,
-                        label: (
-                            <span style={{ fontWeight: 500 }}>
-                                <CodeOutlined style={{ marginRight: 8 }} />
-                                {eventType}
-                            </span>
-                        ),
-                        extra: (
-                            <Space onClick={(e) => e.stopPropagation()}>
-                                <Button
-                                    size="small"
-                                    type="link"
-                                    onClick={() => handleEditEvent(eventType)}
-                                >
-                                    编辑
-                                </Button>
-                                <Button
-                                    size="small"
-                                    type="link"
-                                    danger
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => handleDeleteEvent(eventType)}
-                                />
-                            </Space>
-                        ),
-                        children: (
-                            <pre style={{
-                                maxHeight: 150,
-                                overflow: 'auto',
-                                background: '#f5f5f5',
-                                padding: 12,
-                                borderRadius: 4,
-                                fontSize: 12,
-                                margin: 0
-                            }}>
-                                {value[eventType]?.value}
-                            </pre>
-                        )
-                    }))}
-                />
-            )}
+    // 调试日志
+    console.log('🎯 EventSetter渲染:', {
+        value,
+        existingEvents,
+        availableEvents,
+        existingEventsLength: existingEvents.length,
+        availableEventsLength: availableEvents.length
+    });
 
-            {/* 添加事件按钮 */}
-            {availableEvents.length > 0 ? (
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 8 }}>
+            <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                事件管理 (已添加{existingEvents.length}个)
+            </div>
+
+            {/* 添加事件按钮 - 始终显示在最上面 */}
+            <div>
                 <Select
                     placeholder="➕ 添加事件"
                     style={{ width: '100%' }}
                     onChange={handleAddEvent}
                     value={undefined}
                     options={availableEvents}
+                    disabled={availableEvents.length === 0}
                 />
-            ) : (
-                <div style={{ color: '#999', fontSize: 12, textAlign: 'center', padding: 8 }}>
-                    已添加所有可用事件
+                {availableEvents.length === 0 && (
+                    <div style={{ color: '#999', fontSize: 12, marginTop: 4 }}>
+                        已添加所有可用事件
+                    </div>
+                )}
+            </div>
+
+            {/* 已添加的事件列表 */}
+            {existingEvents.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                    {existingEvents.map(eventType => (
+                        <div key={eventType} style={{
+                            border: '1px solid #d9d9d9',
+                            borderRadius: 4,
+                            padding: 12,
+                            marginBottom: 8,
+                            background: '#fafafa'
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: 8
+                            }}>
+                                <span style={{ fontWeight: 500 }}>
+                                    <CodeOutlined style={{ marginRight: 8 }} />
+                                    {eventType}
+                                </span>
+                                <Space>
+                                    <Button
+                                        size="small"
+                                        type="link"
+                                        onClick={() => handleEditEvent(eventType)}
+                                    >
+                                        编辑
+                                    </Button>
+                                    <Button
+                                        size="small"
+                                        type="link"
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                        onClick={() => handleDeleteEvent(eventType)}
+                                    />
+                                </Space>
+                            </div>
+                            <pre style={{
+                                maxHeight: 100,
+                                overflow: 'auto',
+                                background: '#fff',
+                                padding: 8,
+                                borderRadius: 4,
+                                fontSize: 12,
+                                margin: 0,
+                                border: '1px solid #e8e8e8'
+                            }}>
+                                {value[eventType]?.value}
+                            </pre>
+                        </div>
+                    ))}
                 </div>
             )}
 
@@ -203,9 +227,10 @@ const EventSetter: React.FC<EventSetterProps> = ({ value = {}, onChange }) => {
                     color: '#999',
                     background: '#fafafa',
                     borderRadius: 4,
-                    fontSize: 12
+                    fontSize: 12,
+                    border: '1px dashed #d9d9d9'
                 }}>
-                    暂无事件，请添加事件
+                    暂无事件，请使用上方下拉框添加
                 </div>
             )}
 
