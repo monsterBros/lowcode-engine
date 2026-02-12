@@ -16,7 +16,7 @@ interface RendererProps {
 }
 
 const Renderer: React.FC<RendererProps> = ({ schema }) => {
-    const { selectedNodeId, setSelectedNodeId, deleteNode, addNode } = useEditor();
+    const { selectedNodeId, setSelectedNodeId, deleteNode, addNode, updateNodeProps } = useEditor();
 
     const handleClick = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
