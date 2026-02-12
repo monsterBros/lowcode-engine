@@ -68,9 +68,19 @@ const PropertyPanel: React.FC = () => {
     }
 
     const handleChange = (propName: string, value: any) => {
-        updateNodeProps(selectedNodeId, {
-            [propName]: value,
-        });
+        // events属性特殊处理：更新到selectedNode.events而不是props
+        if (propName === 'events') {
+            // 需要通过updateNode更新events
+            // 由于当前updateNodeProps只更新props，我们需要特殊处理
+            // 暂时将events存储到props中（后续可以优化）
+            updateNodeProps(selectedNodeId, {
+                [propName]: value,
+            });
+        } else {
+            updateNodeProps(selectedNodeId, {
+                [propName]: value,
+            });
+        }
     };
 
     return (
@@ -99,7 +109,11 @@ const PropertyPanel: React.FC = () => {
                             );
                         }
 
-                        const currentValue = selectedNode.props?.[prop.name] ?? prop.defaultValue;
+                        // events属性特殊处理：从selectedNode.events读取，而不是props
+                        const currentValue = prop.name === 'events'
+                            ? (selectedNode.events ?? prop.defaultValue)
+                            : (selectedNode.props?.[prop.name] ?? prop.defaultValue);
+
                         const setterProps = typeof prop.setter === 'object' ? (prop.setter.props || {}) : {};
 
                         return (
