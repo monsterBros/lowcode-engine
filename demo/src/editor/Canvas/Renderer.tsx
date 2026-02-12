@@ -5,6 +5,7 @@ import { materialRegistry } from '@/materials/registry';
 import MaterialComponents from '@/materials/components';
 import { generateId } from '@/utils/uuid';
 import { expressionEngine } from '@/engine/ExpressionEngine';
+import { findNode } from '@/utils/schema';
 import styles from './Renderer.module.css';
 
 interface RendererProps {
@@ -112,18 +113,36 @@ const Renderer: React.FC<RendererProps> = ({ schema }) => {
         const isSelected = selectedNodeId === node.id;
         const isContainer = materialRegistry.isContainer(node.componentName);
 
-        // 处理事件绑定
+        // 处理事件绑定 - 使用增强的组件事件系统
         const eventProps: any = {};
         if (node.events) {
-            Object.keys(node.events).forEach(eventName => {
-                const handler = node.events![eventName];
-                if (handler.type === 'JSFunction') {
-                    try {
-                        // 执行用户定义的函数
-                        eventProps[eventName] = new Function('return ' + handler.value)();
-                    } catch (e) {
-                        console.error(`Event handler error for ${eventName}:`, e);
+            const { componentEventSystem } = require('@/engine/ComponentEventSystem');
+
+            componentEventSystem.setupComponentEvents(
+                node.id,
+                node.events,
+                {
+                    getNode: (id: string) => findNode(schema, id),
+                    updateNode: updateNodeProps,
+                    getState: (key: string) => {
+                        // TODO: 集成全局状态管理器
+                        return (window as any).__GLOBAL_STATE__?.[key];
+                    },
+                    setState: (key: string, value: any) => {
+                        // TODO: 集成全局状态管理器
+                        if (!(window as any).__GLOBAL_STATE__) {
+                            (window as any).__GLOBAL_STATE__ = {};
+                        }
+                        (window as any).__GLOBAL_STATE__[key] = value;
                     }
+                }
+            );
+
+            // 为每个事件创建处理器
+            Object.keys(node.events).forEach(eventName => {
+                const handler = componentEventSystem.getEventHandler(node.id, eventName);
+                if (handler) {
+                    eventProps[eventName] = handler;
                 }
             });
         }
