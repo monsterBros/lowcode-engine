@@ -6,7 +6,7 @@ import MaterialComponents from '@/materials/components';
 import { generateId } from '@/utils/uuid';
 import { expressionEngine } from '@/engine/ExpressionEngine';
 import { findNode } from '@/utils/schema';
-import { ComponentEventSystem } from '@/engine/ComponentEventSystem';
+import { componentEventSystem } from '@/engine/ComponentEventSystem';
 import { stateManager } from '@/engine/StateManager';
 import { refManager } from '@/engine/RefManager';
 import styles from './Renderer.module.css';
