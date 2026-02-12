@@ -35,7 +35,7 @@ export class RefManager {
         const ref = this.refs.get(nodeId);
 
         if (!ref?.current) {
-            console.warn(`Node ${node Id} ref not found`);
+            console.warn(`Node ${nodeId} ref not found`);
             return undefined;
         }
 
@@ -43,11 +43,11 @@ export class RefManager {
             try {
                 return ref.current[methodName](...args);
             } catch (error) {
-                console.error(`Error calling method ${ methodName } on node ${ nodeId }: `, error);
+                console.error(`Error calling method ${methodName} on node ${nodeId}:`, error);
                 return undefined;
             }
         } else {
-            console.warn(`Method ${ methodName } not found on node ${ nodeId } `);
+            console.warn(`Method ${methodName} not found on node ${nodeId}`);
             return undefined;
         }
     }
