@@ -1,7 +1,21 @@
-import React, { useState } from 'react';
-import { Button, Select, Space, Collapse, Modal } from 'antd';
-import { PlusOutlined, DeleteOutlined, CodeOutlined } from '@ant-design/icons';
-import Editor from '@monaco-editor/react';
+import React, { useState, Suspense, lazy } from 'react';
+import { Button, Select, Space, Collapse, Modal, Input } from 'antd';
+import { DeleteOutlined, CodeOutlined } from '@ant-design/icons';
+
+// 动态导入Monaco，如果加载失败则使用TextArea
+const MonacoEditor = lazy(() =>
+    import('@monaco-editor/react').catch(() => ({
+        default: ({ value, onChange }: any) => (
+            <Input.TextArea
+                value={value}
+                onChange={(e) => onChange?.(e.target.value)}
+                rows={20}
+                placeholder="编辑事件代码..."
+                style={{ fontFamily: 'monospace', fontSize: 13 }}
+            />
+        )
+    }))
+);
 
 interface EventHandler {
     type: 'JSFunction';
@@ -231,21 +245,27 @@ const EventSetter: React.FC<EventSetterProps> = ({ value = {}, onChange }) => {
 
                     {/* Monaco编辑器 */}
                     <div style={{ border: '1px solid #d9d9d9', borderRadius: 4 }}>
-                        <Editor
-                            height="400px"
-                            defaultLanguage="javascript"
-                            value={editorCode}
-                            onChange={(val) => setEditorCode(val || '')}
-                            theme="vs-light"
-                            options={{
-                                minimap: { enabled: false },
-                                fontSize: 13,
-                                lineNumbers: 'on',
-                                scrollBeyondLastLine: false,
-                                automaticLayout: true,
-                                tabSize: 2,
-                            }}
-                        />
+                        <Suspense fallback={
+                            <div style={{ padding: 20, textAlign: 'center' }}>
+                                加载编辑器...
+                            </div>
+                        }>
+                            <MonacoEditor
+                                height="400px"
+                                defaultLanguage="javascript"
+                                value={editorCode}
+                                onChange={(val: string) => setEditorCode(val || '')}
+                                theme="vs-light"
+                                options={{
+                                    minimap: { enabled: false },
+                                    fontSize: 13,
+                                    lineNumbers: 'on',
+                                    scrollBeyondLastLine: false,
+                                    automaticLayout: true,
+                                    tabSize: 2,
+                                }}
+                            />
+                        </Suspense>
                     </div>
 
                     {/* API提示 */}
