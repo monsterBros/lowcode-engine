@@ -5,6 +5,7 @@ import {
     deleteNodeFromSchema,
     updateNodePropsInSchema,
 } from '@/utils/schema';
+import { moveNodeInSchema } from '@/utils/schemaHelpers';
 import { generateId } from '@/utils/uuid';
 import { History } from '@/engine/History';
 import { eventBus, EVENTS } from '@/engine/EventBus';
@@ -98,8 +99,6 @@ export const EditorProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     };
 
     const moveNode = (nodeId: string, targetParentId: string, targetIndex: number) => {
-        // 导入移动节点的工具函数
-        const { moveNodeInSchema } = require('@/utils/schemaHelpers');
         const newSchema = moveNodeInSchema(schema, nodeId, targetParentId, targetIndex);
         updateSchema(newSchema);
         eventBus.emit(EVENTS.NODE_MOVE, { nodeId, targetParentId, targetIndex });
