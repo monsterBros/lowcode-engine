@@ -12,11 +12,12 @@ export { default as RateSetter } from './RateSetter';
 export { default as SwitchSetter } from './SwitchSetter';
 export { default as ClassNameSetter } from './ClassNameSetter';
 
-// 复杂类型Setter (4种)
+// 复杂类型Setter (5种)
 export { default as ArraySetter } from './ArraySetter';
 export { default as JSONSetter } from './JSONSetter';
 export { default as FunctionSetter } from './FunctionSetter';
 export { default as ExpressionSetter } from './ExpressionSetter';
+export { default as EventSetter } from './EventSetter';
 
 // 资源类型Setter (2种)
 export { default as ImageSetter } from './ImageSetter';
@@ -53,6 +54,7 @@ import ArraySetter from './ArraySetter';
 import JSONSetter from './JSONSetter';
 import FunctionSetter from './FunctionSetter';
 import ExpressionSetter from './ExpressionSetter';
+import EventSetter from './EventSetter';
 import ImageSetter from './ImageSetter';
 import IconSetter from './IconSetter';
 import StyleSetter from './StyleSetter';
@@ -81,6 +83,7 @@ export const SetterMap = {
     ArraySetter,
     JSONSetter,
     FunctionSetter,
+    EventSetter,
     ExpressionSetter,
     ImageSetter,
     IconSetter,
