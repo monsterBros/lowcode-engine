@@ -22,10 +22,11 @@ const SetterComponents: Record<string, React.ComponentType<any>> = {
     SwitchSetter: Setters.SwitchSetter,
     ClassNameSetter: Setters.ClassNameSetter,
 
-    // 复杂Setter (4种)
+    // 复杂Setter (5种)
     ArraySetter: Setters.ArraySetter,
     JSONSetter: Setters.JSONSetter,
     FunctionSetter: Setters.FunctionSetter,
+    EventSetter: Setters.EventSetter,
     ExpressionSetter: Setters.ExpressionSetter,
 
     // 资源Setter (2种)
@@ -81,19 +82,25 @@ const PropertyPanel: React.FC = () => {
             <div className={styles.content}>
                 <Form layout="vertical" size="small">
                     {material.props.map((prop) => {
-                        const SetterComponent = SetterComponents[prop.setter.componentName];
+                        // 支持setter为字符串或对象
+                        const setterName = typeof prop.setter === 'string'
+                            ? prop.setter
+                            : prop.setter.componentName;
+
+                        const SetterComponent = SetterComponents[setterName];
 
                         if (!SetterComponent) {
                             return (
                                 <Form.Item key={prop.name} label={prop.title}>
                                     <div style={{ color: '#999' }}>
-                                        未找到Setter: {prop.setter.componentName}
+                                        未找到Setter: {setterName}
                                     </div>
                                 </Form.Item>
                             );
                         }
 
                         const currentValue = selectedNode.props?.[prop.name] ?? prop.defaultValue;
+                        const setterProps = typeof prop.setter === 'object' ? (prop.setter.props || {}) : {};
 
                         return (
                             <Form.Item
@@ -104,7 +111,7 @@ const PropertyPanel: React.FC = () => {
                                 <SetterComponent
                                     value={currentValue}
                                     onChange={(value: any) => handleChange(prop.name, value)}
-                                    {...(prop.setter.props || {})}
+                                    {...setterProps}
                                 />
                             </Form.Item>
                         );
