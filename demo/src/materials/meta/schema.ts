@@ -53,6 +53,14 @@ export const materialsMeta: MaterialMeta[] = [
                     },
                 },
             },
+            {
+                name: 'events',
+                title: '事件',
+                type: 'object',
+                setter: {
+                    componentName: 'EventSetter',
+                },
+            },
         ],
         configure: {
             component: {
