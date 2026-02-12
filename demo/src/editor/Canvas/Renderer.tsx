@@ -117,23 +117,16 @@ const Renderer: React.FC<RendererProps> = ({ schema }) => {
         // 处理事件绑定 - 使用增强的组件事件系统
         const eventProps: any = {};
         if (node.events) {
+            const { stateManager } = require('@/engine/StateManager');
+
             componentEventSystem.setupComponentEvents(
                 node.id,
                 node.events,
                 {
                     getNode: (id: string) => findNode(schema, id),
                     updateNode: updateNodeProps,
-                    getState: (key: string) => {
-                        // TODO: 集成全局状态管理器
-                        return (window as any).__GLOBAL_STATE__?.[key];
-                    },
-                    setState: (key: string, value: any) => {
-                        // TODO: 集成全局状态管理器
-                        if (!(window as any).__GLOBAL_STATE__) {
-                            (window as any).__GLOBAL_STATE__ = {};
-                        }
-                        (window as any).__GLOBAL_STATE__[key] = value;
-                    }
+                    getState: (key: string) => stateManager.get(key),
+                    setState: (key: string, value: any) => stateManager.set(key, value)
                 }
             );
 
